@@ -5,6 +5,7 @@ import PartnerAccordion from "./sales/PartnerAccordion";
 import type { Partner, Sale } from "@/lib/types";
 import Avatar from "./Avatar";
 import DeletePartnerModal from "./DeletePartnerModal";
+import EditCredentialsModal from "./EditCredentialsModal";
 
 function partnerName(p: Partner) {
   return p.pessoa === "PF" ? p.nome_completo || "" : p.fantasia || "";
@@ -42,6 +43,9 @@ export default function PartnersList({
   loading,
   onToggleDemo,
   onDeletePartner,
+  onToggleSuspend,
+  onSaveUsername,
+  onRegeneratePassword,
   onChanged,
   onError,
 }: {
@@ -50,11 +54,15 @@ export default function PartnersList({
   loading: boolean;
   onToggleDemo?: (partner: Partner) => void;
   onDeletePartner?: (partner: Partner) => Promise<void>;
+  onToggleSuspend?: (partner: Partner) => void;
+  onSaveUsername?: (partner: Partner, username: string) => Promise<boolean>;
+  onRegeneratePassword?: (partner: Partner) => Promise<boolean>;
   onChanged: () => void;
   onError: (message: string) => void;
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Partner | null>(null);
+  const [editingCredentials, setEditingCredentials] = useState<Partner | null>(null);
 
   if (loading) {
     return (
@@ -94,6 +102,7 @@ export default function PartnersList({
               </div>
               <div className="btn-row">
                 <span className="badge kind">{p.pessoa}</span>
+                {p.is_suspended && <span className="badge cancelled">🚫 Suspenso</span>}
                 {onToggleDemo && (
                   <button
                     className={`badge ${p.is_demo ? "demo" : "demo-off"}`}
@@ -129,11 +138,23 @@ export default function PartnersList({
               </div>
             </details>
 
-            {onDeletePartner && (
+            {(onToggleSuspend || onSaveUsername || onDeletePartner) && (
               <div className="btn-row" style={{ marginTop: 10 }}>
-                <button className="btn ghost-red" onClick={() => setPendingDelete(p)}>
-                  Excluir parceiro
-                </button>
+                {onToggleSuspend && (
+                  <button className="btn" onClick={() => onToggleSuspend(p)}>
+                    {p.is_suspended ? "✅ Reativar parceiro" : "🚫 Suspender parceiro"}
+                  </button>
+                )}
+                {onSaveUsername && (
+                  <button className="btn" onClick={() => setEditingCredentials(p)}>
+                    ✏️ Editar usuário/senha
+                  </button>
+                )}
+                {onDeletePartner && (
+                  <button className="btn ghost-red" onClick={() => setPendingDelete(p)}>
+                    Excluir parceiro
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -149,6 +170,23 @@ export default function PartnersList({
             setPendingDelete(null);
           }}
           onClose={() => setPendingDelete(null)}
+        />
+      )}
+
+      {editingCredentials && onSaveUsername && onRegeneratePassword && (
+        <EditCredentialsModal
+          partner={editingCredentials}
+          onSaveUsername={async (username) => {
+            const ok = await onSaveUsername(editingCredentials, username);
+            if (ok) setEditingCredentials(null);
+            return ok;
+          }}
+          onRegeneratePassword={async () => {
+            const ok = await onRegeneratePassword(editingCredentials);
+            if (ok) setEditingCredentials(null);
+            return ok;
+          }}
+          onClose={() => setEditingCredentials(null)}
         />
       )}
     </div>

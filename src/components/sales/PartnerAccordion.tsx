@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { commissionRate, displayName, kindLabel, ONE_TIME_COMMISSION } from "@/lib/commission";
 import { fmt } from "@/lib/format";
+import { generateSupplierOrderPdf } from "@/lib/pdfReport";
 import { buildPixPayload } from "@/lib/pix";
 import type { Partner, Sale } from "@/lib/types";
 import AdminNotaFiscal from "./AdminNotaFiscal";
@@ -22,6 +23,18 @@ export default function PartnerAccordion({
   onError: (message: string) => void;
 }) {
   const [qrDataUrl, setQrDataUrl] = useState("");
+  const [pedidos, setPedidos] = useState<{ name: string; createdAt: string; signedUrl: string | null }[]>([]);
+  const [pedidosLoading, setPedidosLoading] = useState(true);
+  const [generatingPedido, setGeneratingPedido] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/partners/${partner.id}/pedido`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.files) setPedidos(data.files);
+      })
+      .finally(() => setPedidosLoading(false));
+  }, [partner.id]);
 
   const activeSales = sales.filter((s) => s.status === "active");
   const dueTotal = activeSales.reduce((sum, s) => {
@@ -84,6 +97,30 @@ export default function PartnerAccordion({
     navigator.clipboard.writeText(payload);
   }
 
+  async function generatePedido() {
+    const result = generateSupplierOrderPdf(partner, sales);
+    if (!result.blob) {
+      onError("Esse parceiro não tem nenhum cliente fechado (venda ativa) para incluir no pedido.");
+      return;
+    }
+    setGeneratingPedido(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", result.blob, "pedido.pdf");
+      const res = await fetch(`/api/partners/${partner.id}/pedido`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        onError(data.error || "Não foi possível arquivar o pedido.");
+        return;
+      }
+      const listRes = await fetch(`/api/partners/${partner.id}/pedido`);
+      const listData = await listRes.json();
+      if (listData.files) setPedidos(listData.files);
+    } finally {
+      setGeneratingPedido(false);
+    }
+  }
+
   if (sales.length === 0) {
     return <div className="empty-state">Esse parceiro ainda não tem clientes cadastrados.</div>;
   }
@@ -117,6 +154,34 @@ export default function PartnerAccordion({
           </div>
         </div>
       )}
+
+      <div className="partner-group-actions">
+        <div className="btn-row">
+          <button className="btn primary" onClick={generatePedido} disabled={generatingPedido}>
+            {generatingPedido ? "Gerando..." : "🖨️ Gerar pedido para fornecedor (PDF)"}
+          </button>
+        </div>
+        {!pedidosLoading && pedidos.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <div className="pix-info-line" style={{ marginBottom: 6 }}>
+              Pedidos já arquivados:
+            </div>
+            <div className="btn-row" style={{ flexWrap: "wrap" }}>
+              {pedidos.map((f) => (
+                <a
+                  key={f.name}
+                  className="receipt-link"
+                  href={f.signedUrl || "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  📄 {new Date(f.createdAt).toLocaleDateString("pt-BR")} {new Date(f.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {sales.map((s) => {
         const isCancelled = s.status === "cancelled";

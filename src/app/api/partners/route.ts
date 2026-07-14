@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminUser, usernameToEmail } from "@/lib/auth";
+import { isAdminUser, isValidAuthUserId, usernameToEmail } from "@/lib/auth";
 import { generateCredentials } from "@/lib/generateCredentials";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -18,7 +18,17 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ partners: data });
+  const partners = await Promise.all(
+    (data || []).map(async (p) => {
+      if (!isValidAuthUserId(p.auth_user_id)) return { ...p, is_suspended: false };
+      const { data: authUser } = await admin.auth.admin.getUserById(p.auth_user_id);
+      const bannedUntil = authUser?.user?.banned_until;
+      const is_suspended = !!bannedUntil && new Date(bannedUntil) > new Date();
+      return { ...p, is_suspended };
+    }),
+  );
+
+  return NextResponse.json({ partners });
 }
 
 export async function POST(request: Request) {

@@ -110,6 +110,66 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
       .catch(() => showToast("Não foi possível conectar. Tente novamente."));
   }
 
+  function toggleSuspend(partner: Partner) {
+    const nextSuspended = !partner.is_suspended;
+    fetch(`/api/partners/${partner.id}/suspend`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ suspended: nextSuspended }),
+    })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) {
+          showToast(data.error || "Não foi possível atualizar o parceiro.");
+          return;
+        }
+        setPartners((prev) => prev.map((p) => (p.id === partner.id ? { ...p, is_suspended: nextSuspended } : p)));
+        showToast(nextSuspended ? "Parceiro suspenso · o login dele fica bloqueado." : "Parceiro reativado.");
+      })
+      .catch(() => showToast("Não foi possível conectar. Tente novamente."));
+  }
+
+  async function saveUsername(partner: Partner, username: string) {
+    try {
+      const res = await fetch(`/api/partners/${partner.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || "Não foi possível salvar o novo usuário.");
+        return false;
+      }
+      setPartners((prev) => prev.map((p) => (p.id === partner.id ? { ...p, username: data.username } : p)));
+      showToast("Usuário atualizado.");
+      return true;
+    } catch {
+      showToast("Não foi possível conectar. Tente novamente.");
+      return false;
+    }
+  }
+
+  async function regeneratePassword(partner: Partner) {
+    try {
+      const res = await fetch(`/api/partners/${partner.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ regeneratePassword: true }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.password) {
+        showToast(data.error || "Não foi possível gerar a senha.");
+        return false;
+      }
+      setCredentials({ name: partner.pessoa === "PF" ? partner.nome_completo || "" : partner.fantasia || "", username: data.username, password: data.password });
+      return true;
+    } catch {
+      showToast("Não foi possível conectar. Tente novamente.");
+      return false;
+    }
+  }
+
   function loadSales() {
     setSalesLoading(true);
     fetch("/api/sales")
@@ -237,6 +297,9 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
             loading={partnersLoading}
             onToggleDemo={toggleDemo}
             onDeletePartner={deletePartner}
+            onToggleSuspend={toggleSuspend}
+            onSaveUsername={saveUsername}
+            onRegeneratePassword={regeneratePassword}
             onChanged={loadSales}
             onError={showToast}
           />

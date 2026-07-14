@@ -133,6 +133,123 @@ export function generatePartnerReportPdf(partner: Partner, sales: Sale[]) {
   return openGeneratedPdf(doc);
 }
 
+function clientField(client: Record<string, unknown>, key: string) {
+  return String(client?.[key] ?? "").trim() || "-";
+}
+
+function clientProducts(client: Record<string, unknown>) {
+  const items = [];
+  if (client?.boxPortao) items.push("Toque Box Portão");
+  if (client?.boxGaragem) items.push("Toque Box Garagem");
+  return items.length ? items.join(" + ") : "-";
+}
+
+export function generateSupplierOrderPdf(partner: Partner, sales: Sale[]) {
+  const closedSales = sales.filter((s) => s.status === "active");
+  if (closedSales.length === 0) return { opened: false, blob: null as Blob | null };
+
+  const doc = new jsPDF();
+  const now = new Date();
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(20, 25, 35);
+  doc.text("Pedido de Instalação · Fornecedor Toque Aí", 14, 18);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(110);
+  doc.text(`Parceiro: ${partnerName(partner)} · ${partner.segment}`, 14, 25);
+  doc.text(
+    `Gerado em ${now.toLocaleDateString("pt-BR")} às ${now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`,
+    14,
+    31,
+  );
+
+  let y = 41;
+
+  const residencial = closedSales.filter((s) => s.kind === "residencial");
+  const condominial = closedSales.filter((s) => s.kind === "condominial");
+
+  if (residencial.length > 0) {
+    doc.setTextColor(0);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Residências", 14, y);
+
+    autoTable(doc, {
+      startY: y + 4,
+      head: [["Cliente", "CPF", "Endereço", "Telefones", "Produtos", "Data da venda", "Valor"]],
+      body: residencial.map((s) => {
+        const c = s.client_data;
+        const cidade = clientField(c, "cidade");
+        const endereco = `${clientField(c, "endereco")}${cidade !== "-" ? ` · ${cidade}` : ""}`;
+        const tels = [clientField(c, "tel1"), clientField(c, "tel2"), clientField(c, "tel3")]
+          .filter((t) => t !== "-")
+          .join(" / ");
+        return [
+          clientField(c, "nomeCompleto"),
+          clientField(c, "cpf"),
+          endereco,
+          tels || "-",
+          clientProducts(c),
+          new Date(s.sale_date).toLocaleDateString("pt-BR"),
+          fmt((s.monthly_value || 0) + (s.installation_value || 0) + (s.setup_value || 0)),
+        ];
+      }),
+      theme: "striped",
+      headStyles: { fillColor: [20, 25, 35] },
+      styles: { fontSize: 8 },
+      margin: { left: 14, right: 14 },
+    });
+
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 12;
+  }
+
+  if (condominial.length > 0) {
+    if (y > 240) {
+      doc.addPage();
+      y = 20;
+    }
+    doc.setTextColor(0);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Condomínios", 14, y);
+
+    autoTable(doc, {
+      startY: y + 4,
+      head: [["Condomínio", "Síndico/Responsável", "CNPJ", "Blocos", "Apartamentos", "Endereço", "Telefone", "Produtos", "Data da venda", "Valor"]],
+      body: condominial.map((s) => {
+        const c = s.client_data;
+        const cidade = clientField(c, "cidade");
+        const endereco = `${clientField(c, "endereco")}${cidade !== "-" ? ` · ${cidade}` : ""}`;
+        return [
+          clientField(c, "nomeCondominio"),
+          clientField(c, "responsavel"),
+          clientField(c, "cnpj"),
+          clientField(c, "blocos"),
+          clientField(c, "aptos"),
+          endereco,
+          clientField(c, "tel"),
+          clientProducts(c),
+          new Date(s.sale_date).toLocaleDateString("pt-BR"),
+          fmt((s.monthly_value || 0) + (s.installation_value || 0) + (s.setup_value || 0)),
+        ];
+      }),
+      theme: "striped",
+      headStyles: { fillColor: [20, 25, 35] },
+      styles: { fontSize: 8 },
+      margin: { left: 14, right: 14 },
+    });
+  }
+
+  addFooter(doc);
+
+  const blob = doc.output("blob");
+  const blobUrl = URL.createObjectURL(blob);
+  const opened = !!window.open(blobUrl, "_blank");
+  return { opened, blob };
+}
+
 export function generateMonthlyReportPdf(partners: Partner[], sales: Sale[]) {
   const doc = new jsPDF();
   const now = new Date();

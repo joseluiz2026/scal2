@@ -17,6 +17,7 @@ export type Partner = {
   username: string | null;
   created_at: string;
   is_demo: boolean;
+  is_suspended: boolean;
 };
 
 export type SaleKind = "residencial" | "condominial";

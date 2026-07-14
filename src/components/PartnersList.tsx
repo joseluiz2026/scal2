@@ -1,5 +1,10 @@
-import type { Partner } from "@/lib/types";
+"use client";
+
+import { useState } from "react";
+import PartnerAccordion from "./sales/PartnerAccordion";
+import type { Partner, Sale } from "@/lib/types";
 import Avatar from "./Avatar";
+import DeletePartnerModal from "./DeletePartnerModal";
 
 function partnerName(p: Partner) {
   return p.pessoa === "PF" ? p.nome_completo || "" : p.fantasia || "";
@@ -33,13 +38,24 @@ function detailsPairs(p: Partner): [string, string | null][] {
 
 export default function PartnersList({
   partners,
+  sales,
   loading,
   onToggleDemo,
+  onDeletePartner,
+  onChanged,
+  onError,
 }: {
   partners: Partner[];
+  sales: Sale[];
   loading: boolean;
   onToggleDemo?: (partner: Partner) => void;
+  onDeletePartner?: (partner: Partner) => Promise<void>;
+  onChanged: () => void;
+  onError: (message: string) => void;
 }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Partner | null>(null);
+
   if (loading) {
     return (
       <div className="card">
@@ -60,9 +76,13 @@ export default function PartnersList({
     <div className="card">
       {partners.map((p) => {
         const docLabel = p.pessoa === "PF" ? "CPF" : "CNPJ";
+        const partnerSales = sales.filter((s) => s.partner_id === p.id);
+        const activeCount = partnerSales.filter((s) => s.status === "active").length;
+        const isExpanded = expandedId === p.id;
+
         return (
           <div className="quote-card" key={p.id}>
-            <div className="sale-top">
+            <div className="sale-top" style={{ cursor: "pointer" }} onClick={() => setExpandedId(isExpanded ? null : p.id)}>
               <div className="avatar-row">
                 <Avatar seed={p.id + "_" + partnerName(p)} name={partnerName(p)} size={40} avatarUrl={p.avatar_url} />
                 <div className="row-info">
@@ -77,18 +97,26 @@ export default function PartnersList({
                 {onToggleDemo && (
                   <button
                     className={`badge ${p.is_demo ? "demo" : "demo-off"}`}
-                    onClick={() => onToggleDemo(p)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleDemo(p);
+                    }}
                     title={p.is_demo ? "Clique para desmarcar como demonstração" : "Clique para marcar como demonstração"}
                   >
                     {p.is_demo ? "🎭 Demo" : "Marcar como demo"}
                   </button>
                 )}
                 <div className="row-value">
-                  <div className="amount">0</div>
+                  <div className="amount">{activeCount}</div>
                   <div className="amount-label">vendas ativas</div>
                 </div>
               </div>
             </div>
+
+            {isExpanded && (
+              <PartnerAccordion partner={p} sales={partnerSales} onChanged={onChanged} onError={onError} />
+            )}
+
             <details className="details-box">
               <summary>Ver dados completos</summary>
               <div className="details-grid">
@@ -100,9 +128,29 @@ export default function PartnersList({
                 ))}
               </div>
             </details>
+
+            {onDeletePartner && (
+              <div className="btn-row" style={{ marginTop: 10 }}>
+                <button className="btn ghost-red" onClick={() => setPendingDelete(p)}>
+                  Excluir parceiro
+                </button>
+              </div>
+            )}
           </div>
         );
       })}
+
+      {pendingDelete && onDeletePartner && (
+        <DeletePartnerModal
+          partnerName={partnerName(pendingDelete)}
+          activeSalesCount={sales.filter((s) => s.partner_id === pendingDelete.id && s.status === "active").length}
+          onConfirm={async () => {
+            await onDeletePartner(pendingDelete);
+            setPendingDelete(null);
+          }}
+          onClose={() => setPendingDelete(null)}
+        />
+      )}
     </div>
   );
 }

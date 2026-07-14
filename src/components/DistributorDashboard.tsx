@@ -92,6 +92,21 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
       .catch(() => showToast("Não foi possível conectar. Tente novamente."));
   }
 
+  function deletePartner(partner: Partner) {
+    return fetch(`/api/partners/${partner.id}`, { method: "DELETE" })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) {
+          showToast(data.error || "Não foi possível excluir o parceiro.");
+          return;
+        }
+        setPartners((prev) => prev.filter((p) => p.id !== partner.id));
+        setSales((prev) => prev.filter((s) => s.partner_id !== partner.id));
+        showToast("Parceiro excluído.");
+      })
+      .catch(() => showToast("Não foi possível conectar. Tente novamente."));
+  }
+
   function loadSales() {
     setSalesLoading(true);
     fetch("/api/sales")
@@ -179,7 +194,15 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
       <div className="section-head">
         <h2>Parceiros cadastrados</h2>
       </div>
-      <PartnersList partners={visiblePartners} loading={partnersLoading} onToggleDemo={toggleDemo} />
+      <PartnersList
+        partners={visiblePartners}
+        sales={visibleSales}
+        loading={partnersLoading}
+        onToggleDemo={toggleDemo}
+        onDeletePartner={deletePartner}
+        onChanged={loadSales}
+        onError={showToast}
+      />
 
       <div className="section-head">
         <h2>Comunicados</h2>

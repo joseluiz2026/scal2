@@ -214,6 +214,11 @@
   .badge.active{ background:var(--signal-soft); color:var(--signal); } .badge.active::before{ background:var(--signal); }
   .badge.cancelled{ background:var(--red-soft); color:var(--red); } .badge.cancelled::before{ background:var(--red); }
   .badge.kind{ background:var(--violet-soft); color:var(--violet); } .badge.kind::before{ background:var(--violet); }
+  button.badge{ border:none; font-family: var(--font-inter); cursor:pointer; }
+  .badge.demo{ background:var(--amber-soft); color:var(--amber); } .badge.demo::before{ background:var(--amber); }
+  .badge.demo-off{ background:transparent; color:var(--text-faint); border:1px dashed var(--border); text-transform:none; letter-spacing:0; }
+  .badge.demo-off::before{ display:none; }
+  .badge.demo-off:hover{ color:var(--text-muted); border-color:var(--text-faint); }
 
   .btn{ font-family: var(--font-inter); font-weight:600; font-size:12.5px; padding: 8px 14px; border-radius:8px; border:1px solid var(--border); background: var(--surface-raised); color:var(--text); cursor:pointer; transition: all 0.15s ease; white-space:nowrap; }
   .btn:hover{ border-color: var(--text-faint); }

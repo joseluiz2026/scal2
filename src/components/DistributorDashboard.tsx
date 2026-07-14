@@ -69,6 +69,29 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
       });
   }, []);
 
+  function toggleDemo(partner: Partner) {
+    const nextIsDemo = !partner.is_demo;
+    fetch(`/api/partners/${partner.id}/demo`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_demo: nextIsDemo }),
+    })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) {
+          showToast(data.error || "Não foi possível atualizar o parceiro.");
+          return;
+        }
+        setPartners((prev) => prev.map((p) => (p.id === partner.id ? { ...p, is_demo: nextIsDemo } : p)));
+        setSales((prev) =>
+          prev.map((s) =>
+            s.partner_id === partner.id && s.partners ? { ...s, partners: { ...s.partners, is_demo: nextIsDemo } } : s,
+          ),
+        );
+      })
+      .catch(() => showToast("Não foi possível conectar. Tente novamente."));
+  }
+
   function loadSales() {
     setSalesLoading(true);
     fetch("/api/sales")
@@ -156,7 +179,7 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
       <div className="section-head">
         <h2>Parceiros cadastrados</h2>
       </div>
-      <PartnersList partners={visiblePartners} loading={partnersLoading} />
+      <PartnersList partners={visiblePartners} loading={partnersLoading} onToggleDemo={toggleDemo} />
 
       <div className="section-head">
         <h2>Comunicados</h2>

@@ -31,7 +31,15 @@ function detailsPairs(p: Partner): [string, string | null][] {
   ];
 }
 
-export default function PartnersList({ partners, loading }: { partners: Partner[]; loading: boolean }) {
+export default function PartnersList({
+  partners,
+  loading,
+  onToggleDemo,
+}: {
+  partners: Partner[];
+  loading: boolean;
+  onToggleDemo?: (partner: Partner) => void;
+}) {
   if (loading) {
     return (
       <div className="card">
@@ -66,6 +74,15 @@ export default function PartnersList({ partners, loading }: { partners: Partner[
               </div>
               <div className="btn-row">
                 <span className="badge kind">{p.pessoa}</span>
+                {onToggleDemo && (
+                  <button
+                    className={`badge ${p.is_demo ? "demo" : "demo-off"}`}
+                    onClick={() => onToggleDemo(p)}
+                    title={p.is_demo ? "Clique para desmarcar como demonstração" : "Clique para marcar como demonstração"}
+                  >
+                    {p.is_demo ? "🎭 Demo" : "Marcar como demo"}
+                  </button>
+                )}
                 <div className="row-value">
                   <div className="amount">0</div>
                   <div className="amount-label">vendas ativas</div>

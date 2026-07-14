@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { generatePartnerReportPdf } from "@/lib/pdfReport";
 import { useToast } from "@/lib/useToast";
 import type { Message, Partner, Sale } from "@/lib/types";
+import PartnerCharts from "./dashboard/PartnerCharts";
 import PartnerStats from "./dashboard/PartnerStats";
 import PartnerMessages from "./messages/PartnerMessages";
 import QuoteForm from "./sales/QuoteForm";
@@ -11,7 +12,13 @@ import ReceiptNotifications from "./sales/ReceiptNotifications";
 import SalesList from "./sales/SalesList";
 import Toast from "./Toast";
 
-export default function PartnerDashboard({ onUnreadChange }: { onUnreadChange?: (count: number) => void }) {
+export default function PartnerDashboard({
+  theme,
+  onUnreadChange,
+}: {
+  theme: string;
+  onUnreadChange?: (count: number) => void;
+}) {
   const [partner, setPartner] = useState<Partner | null>(null);
   const [sales, setSales] = useState<Sale[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -80,6 +87,10 @@ export default function PartnerDashboard({ onUnreadChange }: { onUnreadChange?: 
         <h2>Meu painel</h2>
       </div>
       {partner && <PartnerStats partner={partner} sales={sales} />}
+
+      <div style={{ marginTop: 24 }}>
+        <PartnerCharts sales={sales} theme={theme} />
+      </div>
 
       <div style={{ margin: "18px 0 20px 0" }}>
         <button className="btn primary" onClick={downloadReport}>

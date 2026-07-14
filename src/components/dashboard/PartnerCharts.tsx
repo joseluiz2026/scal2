@@ -16,14 +16,10 @@ import {
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 import { fmt } from "@/lib/format";
 import { computeMonthlyCommission } from "@/lib/monthlyCommission";
-import type { Partner, Sale } from "@/lib/types";
+import type { Sale } from "@/lib/types";
 import { useThemeColors } from "./useThemeColors";
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend, Filler);
-
-function partnerName(p: Partner) {
-  return p.pessoa === "PF" ? p.nome_completo || "" : p.fantasia || "";
-}
 
 const tooltipCurrency: NonNullable<ChartOptions<"bar">["plugins"]>["tooltip"] = {
   callbacks: {
@@ -31,30 +27,17 @@ const tooltipCurrency: NonNullable<ChartOptions<"bar">["plugins"]>["tooltip"] = 
   },
 };
 
-export default function DashboardCharts({ partners, sales, theme }: { partners: Partner[]; sales: Sale[]; theme: string }) {
+export default function PartnerCharts({ sales, theme }: { sales: Sale[]; theme: string }) {
   const c = useThemeColors(theme);
 
-  const partnersRanked = partners
-    .map((p) => {
-      const pContracts = sales.filter((s) => s.partner_id === p.id);
-      const total = pContracts.reduce((sum, s) => {
-        const paidM = (s.installments || []).filter((i) => i.status === "paid").reduce((a, i) => a + i.amount, 0);
-        const paidOT = s.one_time_status === "paid" ? 100 : 0;
-        return sum + paidM + paidOT;
-      }, 0);
-      const parts = partnerName(p).split(" ");
-      return { name: `${parts[0]} ${parts[1] || ""}`, total };
-    })
-    .sort((a, b) => b.total - a.total);
-
-  const activeSalesAll = sales.filter((s) => s.status === "active");
-  const resCount = activeSalesAll.filter((s) => s.kind === "residencial").length;
-  const condCount = activeSalesAll.filter((s) => s.kind === "condominial").length;
+  const activeSales = sales.filter((s) => s.status === "active");
+  const resCount = activeSales.filter((s) => s.kind === "residencial").length;
+  const condCount = activeSales.filter((s) => s.kind === "condominial").length;
   const cancelledCount = sales.filter((s) => s.status === "cancelled").length;
   const pendingCount = sales.filter((s) => s.status === "aguardando_cotacao").length;
 
   const forecastByMonth = Array(12).fill(0);
-  activeSalesAll.forEach((s) => {
+  activeSales.forEach((s) => {
     (s.installments || []).forEach((i) => {
       if (i.status === "due" || i.status === "future") forecastByMonth[i.month - 1] += i.amount;
     });
@@ -72,9 +55,11 @@ export default function DashboardCharts({ partners, sales, theme }: { partners: 
     },
   };
 
+  if (sales.length === 0) return null;
+
   return (
     <>
-      <div className="chart-card" style={{ marginTop: 36, marginBottom: 24 }}>
+      <div className="chart-card" style={{ marginBottom: 24 }}>
         <div className="chart-title">Comissão paga por mês</div>
         <div className="chart-box">
           <Line
@@ -123,22 +108,7 @@ export default function DashboardCharts({ partners, sales, theme }: { partners: 
         </div>
       </div>
 
-      <div className="section-head">
-        <h2>Dashboard</h2>
-      </div>
       <div className="dashboard-grid">
-        <div className="chart-card">
-          <div className="chart-title">Comissão total por parceiro</div>
-          <div className="chart-box">
-            <Bar
-              data={{
-                labels: partnersRanked.map((d) => d.name),
-                datasets: [{ data: partnersRanked.map((d) => d.total), backgroundColor: c.accent, borderRadius: 6, maxBarThickness: 36 }],
-              }}
-              options={axisOptions}
-            />
-          </div>
-        </div>
         <div className="chart-card">
           <div className="chart-title">Composição da carteira</div>
           <div className="chart-box">
@@ -163,7 +133,7 @@ export default function DashboardCharts({ partners, sales, theme }: { partners: 
               data={{
                 labels: ["Ativos", "Cancelados", "Aguardando cotação"],
                 datasets: [
-                  { data: [activeSalesAll.length, cancelledCount, pendingCount], backgroundColor: [c.signal, c.red, c.amber], borderWidth: 0 },
+                  { data: [activeSales.length, cancelledCount, pendingCount], backgroundColor: [c.signal, c.red, c.amber], borderWidth: 0 },
                 ],
               }}
               options={{
@@ -175,7 +145,7 @@ export default function DashboardCharts({ partners, sales, theme }: { partners: 
             />
           </div>
         </div>
-        <div className="chart-card">
+        <div className="chart-card" style={{ gridColumn: "span 2" }}>
           <div className="chart-title">Projeção de comissão por mês do contrato</div>
           <div className="chart-box">
             <Bar

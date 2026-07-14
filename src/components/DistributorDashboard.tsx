@@ -18,7 +18,10 @@ import PendingQuotesList from "./sales/PendingQuotesList";
 import ScheduleList from "./sales/ScheduleList";
 import Toast from "./Toast";
 
+type Tab = "charts" | "quotes" | "partners" | "schedule";
+
 export default function DistributorDashboard({ theme }: { theme: string }) {
+  const [activeTab, setActiveTab] = useState<Tab>("charts");
   const [partners, setPartners] = useState<Partner[]>([]);
   const [partnersLoading, setPartnersLoading] = useState(true);
   const [sales, setSales] = useState<Sale[]>([]);
@@ -148,76 +151,107 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
           </button>
         </div>
       </div>
-      <DistStats partners={visiblePartners} sales={visibleSales} />
-
-      {!salesLoading && !partnersLoading && <DashboardCharts partners={visiblePartners} sales={visibleSales} theme={theme} />}
-
-      <div className="section-head">
-        <h2>Resumo do mês</h2>
+      <div className="view-switch" style={{ marginBottom: 28 }}>
+        <button className={activeTab === "charts" ? "active" : ""} onClick={() => setActiveTab("charts")}>
+          📊 Gráficos
+        </button>
+        <button className={activeTab === "quotes" ? "active" : ""} onClick={() => setActiveTab("quotes")}>
+          Cotações e comunicados
+        </button>
+        <button className={activeTab === "partners" ? "active" : ""} onClick={() => setActiveTab("partners")}>
+          Parceiros
+        </button>
+        <button className={activeTab === "schedule" ? "active" : ""} onClick={() => setActiveTab("schedule")}>
+          Cronograma de comissões
+        </button>
       </div>
-      <div className="summary-grid">
-        <KpiStack sales={visibleSales} />
-        <OverviewCard sales={visibleSales} />
-        <RankingCard partners={visiblePartners} sales={visibleSales} />
-      </div>
 
-      <div className="section-head">
-        <h2>Pedidos de cotação</h2>
-        <span className="count">{pendingSales.length} aguardando cotação</span>
-      </div>
-      {salesLoading ? (
-        <div className="card">
-          <div className="empty-state">Carregando...</div>
-        </div>
-      ) : (
-        <PendingQuotesList sales={pendingSales} onChanged={loadSales} onError={showToast} />
+      {activeTab === "charts" && (
+        <>
+          <DistStats partners={visiblePartners} sales={visibleSales} />
+
+          {!salesLoading && !partnersLoading && <DashboardCharts partners={visiblePartners} sales={visibleSales} theme={theme} />}
+
+          <div className="section-head">
+            <h2>Resumo do mês</h2>
+          </div>
+          <div className="summary-grid">
+            <KpiStack sales={visibleSales} />
+            <OverviewCard sales={visibleSales} />
+            <RankingCard partners={visiblePartners} sales={visibleSales} />
+          </div>
+        </>
       )}
 
-      <div className="section-head">
-        <h2>Cronograma de comissões</h2>
-        <span className="count">clique num mês pendente para marcar como pago</span>
-      </div>
-      {!salesLoading && <ScheduleList sales={scheduleSales} onChanged={loadSales} onError={showToast} />}
+      {activeTab === "quotes" && (
+        <>
+          <div className="section-head">
+            <h2>Pedidos de cotação</h2>
+            <span className="count">{pendingSales.length} aguardando cotação</span>
+          </div>
+          {salesLoading ? (
+            <div className="card">
+              <div className="empty-state">Carregando...</div>
+            </div>
+          ) : (
+            <PendingQuotesList sales={pendingSales} onChanged={loadSales} onError={showToast} />
+          )}
 
-      <div className="section-head">
-        <h2>Cadastrar novo parceiro</h2>
-      </div>
-      <PartnerForm
-        onCreated={(partner, creds) => {
-          setPartners((prev) => [partner, ...prev]);
-          setCredentials(creds);
-          showToast("Parceiro cadastrado · confira as credenciais geradas");
-        }}
-        onError={showToast}
-      />
+          <div className="section-head">
+            <h2>Comunicados</h2>
+          </div>
+          <MessageForm
+            partners={visiblePartners}
+            onSent={(msg, recipientLabel) => {
+              setMessages((prev) => [msg, ...prev]);
+              showToast(`Comunicado enviado para ${recipientLabel}`);
+            }}
+            onError={showToast}
+          />
+          <div style={{ marginTop: 14 }}>
+            <SentMessagesList messages={messages} partners={visiblePartners} />
+          </div>
+        </>
+      )}
 
-      <div className="section-head">
-        <h2>Parceiros cadastrados</h2>
-      </div>
-      <PartnersList
-        partners={visiblePartners}
-        sales={visibleSales}
-        loading={partnersLoading}
-        onToggleDemo={toggleDemo}
-        onDeletePartner={deletePartner}
-        onChanged={loadSales}
-        onError={showToast}
-      />
+      {activeTab === "partners" && (
+        <>
+          <div className="section-head">
+            <h2>Cadastrar novo parceiro</h2>
+          </div>
+          <PartnerForm
+            onCreated={(partner, creds) => {
+              setPartners((prev) => [partner, ...prev]);
+              setCredentials(creds);
+              showToast("Parceiro cadastrado · confira as credenciais geradas");
+            }}
+            onError={showToast}
+          />
 
-      <div className="section-head">
-        <h2>Comunicados</h2>
-      </div>
-      <MessageForm
-        partners={visiblePartners}
-        onSent={(msg, recipientLabel) => {
-          setMessages((prev) => [msg, ...prev]);
-          showToast(`Comunicado enviado para ${recipientLabel}`);
-        }}
-        onError={showToast}
-      />
-      <div style={{ marginTop: 14 }}>
-        <SentMessagesList messages={messages} partners={visiblePartners} />
-      </div>
+          <div className="section-head">
+            <h2>Parceiros cadastrados</h2>
+          </div>
+          <PartnersList
+            partners={visiblePartners}
+            sales={visibleSales}
+            loading={partnersLoading}
+            onToggleDemo={toggleDemo}
+            onDeletePartner={deletePartner}
+            onChanged={loadSales}
+            onError={showToast}
+          />
+        </>
+      )}
+
+      {activeTab === "schedule" && (
+        <>
+          <div className="section-head">
+            <h2>Cronograma de comissões</h2>
+            <span className="count">clique num mês pendente para marcar como pago</span>
+          </div>
+          {!salesLoading && <ScheduleList sales={scheduleSales} onChanged={loadSales} onError={showToast} />}
+        </>
+      )}
 
       {credentials && <CredentialsModal data={credentials} onClose={() => setCredentials(null)} />}
       <Toast message={message} />

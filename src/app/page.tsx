@@ -58,7 +58,7 @@ export default function Home() {
       {session.role === "admin" ? (
         <DistributorDashboard theme={theme} />
       ) : (
-        <PartnerDashboard onUnreadChange={handleUnreadChange} />
+        <PartnerDashboard theme={theme} onUnreadChange={handleUnreadChange} />
       )}
     </div>
   );

@@ -16,6 +16,7 @@ export type Partner = {
   email: string | null;
   username: string | null;
   created_at: string;
+  is_demo: boolean;
 };
 
 export type SaleKind = "residencial" | "condominial";
@@ -38,7 +39,10 @@ export type Installment = {
   receipt_signed_url?: string | null;
 };
 
-export type SalePartnerSummary = Pick<Partner, "id" | "pessoa" | "nome_completo" | "fantasia" | "segment" | "rate">;
+export type SalePartnerSummary = Pick<
+  Partner,
+  "id" | "pessoa" | "nome_completo" | "fantasia" | "segment" | "rate" | "is_demo"
+>;
 
 export type Sale = {
   id: string;

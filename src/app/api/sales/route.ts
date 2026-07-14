@@ -18,7 +18,7 @@ export async function GET() {
   if (isAdminUser(userData.user)) {
     const { data, error } = await admin
       .from("sales")
-      .select("*, installments(*), partners(id, pessoa, nome_completo, fantasia, segment, rate)")
+      .select("*, installments(*), partners(id, pessoa, nome_completo, fantasia, segment, rate, is_demo)")
       .order("created_at", { ascending: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     const sales = await Promise.all(

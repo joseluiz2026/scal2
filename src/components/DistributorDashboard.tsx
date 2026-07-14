@@ -25,7 +25,23 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
   const [salesLoading, setSalesLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [credentials, setCredentials] = useState<{ name: string; username: string; password: string } | null>(null);
+  const [showDemo, setShowDemo] = useState(true);
   const { message, showToast } = useToast();
+
+  useEffect(() => {
+    const stored = localStorage.getItem("scal-show-demo");
+    // localStorage is client-only and unavailable during the server render pass.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (stored !== null) setShowDemo(stored === "true");
+  }, []);
+
+  function toggleShowDemo() {
+    setShowDemo((prev) => {
+      const next = !prev;
+      localStorage.setItem("scal-show-demo", String(next));
+      return next;
+    });
+  }
 
   useEffect(() => {
     fetch("/api/partners")
@@ -63,11 +79,15 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
       .finally(() => setSalesLoading(false));
   }
 
-  const pendingSales = sales.filter((s) => s.status === "aguardando_cotacao");
-  const scheduleSales = sales.filter((s) => s.status === "active" || s.status === "cancelled");
+  const visiblePartners = showDemo ? partners : partners.filter((p) => !p.is_demo);
+  const visibleSales = showDemo ? sales : sales.filter((s) => !s.partners?.is_demo);
+  const demoPartnerCount = partners.filter((p) => p.is_demo).length;
+
+  const pendingSales = visibleSales.filter((s) => s.status === "aguardando_cotacao");
+  const scheduleSales = visibleSales.filter((s) => s.status === "active" || s.status === "cancelled");
 
   function downloadMonthlyReport() {
-    const opened = generateMonthlyReportPdf(partners, sales);
+    const opened = generateMonthlyReportPdf(visiblePartners, visibleSales);
     showToast(
       opened
         ? "Relatório aberto em nova aba — use o botão de download do navegador ou Ctrl+P pra imprimir"
@@ -79,21 +99,28 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
     <div className="wrap">
       <div className="section-head">
         <h2>Visão geral</h2>
-        <button className="btn primary" onClick={downloadMonthlyReport}>
-          📄 Gerar relatório do mês (PDF)
-        </button>
+        <div className="btn-row">
+          {demoPartnerCount > 0 && (
+            <button className="btn" onClick={toggleShowDemo}>
+              {showDemo ? "🙈 Ocultar dados de demonstração" : "🎭 Mostrar dados de demonstração"}
+            </button>
+          )}
+          <button className="btn primary" onClick={downloadMonthlyReport}>
+            📄 Gerar relatório do mês (PDF)
+          </button>
+        </div>
       </div>
-      <DistStats partners={partners} sales={sales} />
+      <DistStats partners={visiblePartners} sales={visibleSales} />
 
-      {!salesLoading && !partnersLoading && <DashboardCharts partners={partners} sales={sales} theme={theme} />}
+      {!salesLoading && !partnersLoading && <DashboardCharts partners={visiblePartners} sales={visibleSales} theme={theme} />}
 
       <div className="section-head">
         <h2>Resumo do mês</h2>
       </div>
       <div className="summary-grid">
-        <KpiStack sales={sales} />
-        <OverviewCard sales={sales} />
-        <RankingCard partners={partners} sales={sales} />
+        <KpiStack sales={visibleSales} />
+        <OverviewCard sales={visibleSales} />
+        <RankingCard partners={visiblePartners} sales={visibleSales} />
       </div>
 
       <div className="section-head">
@@ -129,13 +156,13 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
       <div className="section-head">
         <h2>Parceiros cadastrados</h2>
       </div>
-      <PartnersList partners={partners} loading={partnersLoading} />
+      <PartnersList partners={visiblePartners} loading={partnersLoading} />
 
       <div className="section-head">
         <h2>Comunicados</h2>
       </div>
       <MessageForm
-        partners={partners}
+        partners={visiblePartners}
         onSent={(msg, recipientLabel) => {
           setMessages((prev) => [msg, ...prev]);
           showToast(`Comunicado enviado para ${recipientLabel}`);
@@ -143,7 +170,7 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
         onError={showToast}
       />
       <div style={{ marginTop: 14 }}>
-        <SentMessagesList messages={messages} partners={partners} />
+        <SentMessagesList messages={messages} partners={visiblePartners} />
       </div>
 
       {credentials && <CredentialsModal data={credentials} onClose={() => setCredentials(null)} />}

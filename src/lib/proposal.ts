@@ -8,5 +8,11 @@ export function proposalNumber(sale: Sale) {
 
 export function recurringServiceLabel(clientData: Record<string, unknown>) {
   const aptos = String(clientData?.aptos ?? "").trim();
-  return aptos ? `Serviço de Interfonia — ${aptos} unidades` : "Serviço de Interfonia Condominial";
+  const main = aptos ? `📡 Interfonia — ${aptos} unidades` : "📡 Interfonia Condominial";
+
+  const addons: string[] = [];
+  if (clientData?.boxPortao) addons.push("Toque Box Portão");
+  if (clientData?.boxGaragem) addons.push("Toque Box Garagem");
+
+  return addons.length ? `${main}\n↳ Inclui ${addons.join(" + ")}` : main;
 }

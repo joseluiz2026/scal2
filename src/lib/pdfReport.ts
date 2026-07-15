@@ -145,8 +145,8 @@ function clientProducts(client: Record<string, unknown>) {
 }
 
 export function generateSupplierOrderPdf(partner: Partner, sales: Sale[]) {
-  const closedSales = sales.filter((s) => s.status === "active");
-  if (closedSales.length === 0) return { opened: false, blob: null as Blob | null };
+  const activeSales = sales.filter((s) => s.status === "active");
+  if (activeSales.length === 0) return { opened: false, blob: null as Blob | null };
 
   const doc = new jsPDF();
   const now = new Date();
@@ -167,8 +167,8 @@ export function generateSupplierOrderPdf(partner: Partner, sales: Sale[]) {
 
   let y = 41;
 
-  const residencial = closedSales.filter((s) => s.kind === "residencial");
-  const condominial = closedSales.filter((s) => s.kind === "condominial");
+  const residencial = activeSales.filter((s) => s.kind === "residencial");
+  const condominial = activeSales.filter((s) => s.kind === "condominial");
 
   if (residencial.length > 0) {
     doc.setTextColor(0);

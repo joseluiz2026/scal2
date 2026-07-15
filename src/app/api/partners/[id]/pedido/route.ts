@@ -32,6 +32,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Nenhum arquivo recebido." }, { status: 400 });
   }
+  if (file.type !== "application/pdf") {
+    return NextResponse.json({ error: "Apenas arquivos PDF são aceitos." }, { status: 400 });
+  }
+  const MAX_SIZE = 10 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    return NextResponse.json({ error: "Arquivo muito grande (máximo 10MB)." }, { status: 400 });
+  }
 
   const path = `${prefixFor(id)}/${Date.now()}.pdf`;
   try {

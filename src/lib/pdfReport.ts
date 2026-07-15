@@ -26,6 +26,28 @@ function addFooter(doc: jsPDF) {
   }
 }
 
+function addContinuationHeader(doc: jsPDF) {
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 2; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(20, 25, 35);
+    doc.text("Toque AI", 14, 14);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(140);
+    doc.text("Proposta Comercial · Continuação", 14, 19);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text(`Página ${i} de ${pageCount}`, 196, 16, { align: "right" });
+    doc.setDrawColor(26, 74, 37);
+    doc.setLineWidth(0.5);
+    doc.line(14, 22, 196, 22);
+  }
+}
+
 function paidTotal(s: Sale) {
   const paidM = (s.installments || []).filter((i) => i.status === "paid").reduce((a, i) => a + i.amount, 0);
   const paidOT = s.one_time_status === "paid" ? 100 : 0;
@@ -403,7 +425,7 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
   y += 22 + 12;
   if (y > 215) {
     doc.addPage();
-    y = 20;
+    y = 34;
   }
 
   doc.setFont("helvetica", "bold");
@@ -459,6 +481,8 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
   doc.setFont("helvetica", "normal");
   doc.setTextColor(85, 85, 85);
   doc.text(partner.telefone || "-", 196, 290, { align: "right" });
+
+  addContinuationHeader(doc);
 
   return openGeneratedPdf(doc);
 }

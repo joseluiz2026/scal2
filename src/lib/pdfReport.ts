@@ -299,14 +299,14 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
 
   doc.setDrawColor(26, 74, 37);
   doc.setLineWidth(0.7);
-  doc.line(14, 30, 196, 30);
+  doc.line(14, 28, 196, 28);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(13);
   doc.setTextColor(26, 74, 37);
-  doc.text(`Proposta de Serviços — Toque AI — ${displayName("condominial", client)}`, 105, 39, { align: "center" });
+  doc.text(`Proposta de Serviços — Toque AI — ${displayName("condominial", client)}`, 105, 35, { align: "center" });
 
-  let y = 49;
+  let y = 43;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(95, 163, 68);
@@ -322,37 +322,37 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
   const endereco = `${String(client?.endereco ?? "")}${cidade ? ` · ${cidade}` : ""}`;
 
   autoTable(doc, {
-    startY: y + 6,
+    startY: y + 5,
     body: [
       ["Razão Social", razaoSocial, "CNPJ/CPF", cnpj],
       ["Contato", responsavel, "Telefone", tel],
       ["Endereço", endereco, "", ""],
     ],
     theme: "plain",
-    styles: { fontSize: 10, cellPadding: 1.5 },
+    styles: { fontSize: 9, cellPadding: 1 },
     columnStyles: { 0: { textColor: 110, cellWidth: 28 }, 2: { textColor: 110, cellWidth: 24 } },
     margin: { left: 14, right: 14 },
   });
 
-  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(26, 106, 48);
   doc.text("SERVIÇOS MENSAIS RECORRENTES", 14, y);
 
   autoTable(doc, {
-    startY: y + 4,
+    startY: y + 3,
     head: [["SERVIÇO", "RECORRÊNCIA", "VALOR"]],
     body: [[recurringServiceLabel(client), "MENSAL", `${fmt(sale.monthly_value || 0)}/mês`]],
     foot: [["TOTAL MENSAL — SERVIÇOS", "", `${fmt(sale.monthly_value || 0)}/mês`]],
     theme: "striped",
-    headStyles: { fillColor: [232, 245, 224], textColor: [45, 106, 48], fontSize: 9 },
-    footStyles: { fillColor: [26, 74, 37], textColor: [158, 241, 119], fontSize: 10, fontStyle: "bold" },
-    styles: { fontSize: 10 },
+    headStyles: { fillColor: [232, 245, 224], textColor: [45, 106, 48], fontSize: 8.5 },
+    footStyles: { fillColor: [26, 74, 37], textColor: [158, 241, 119], fontSize: 9, fontStyle: "bold" },
+    styles: { fontSize: 9, cellPadding: 1.5 },
     margin: { left: 14, right: 14 },
   });
 
-  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
 
   const setupValue = sale.setup_value || 0;
   const installationValue = sale.installation_value || 0;
@@ -367,63 +367,64 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
     if (installationValue > 0) setupRows.push(["Taxa de Instalação", "ÚNICO", fmt(installationValue)]);
 
     autoTable(doc, {
-      startY: y + 4,
+      startY: y + 3,
       head: [["DESCRIÇÃO", "TIPO", "VALOR"]],
       body: setupRows,
       foot: [["TOTAL SETUP", "", fmt(setupValue + installationValue)]],
       theme: "striped",
-      headStyles: { fillColor: [255, 248, 224], textColor: [160, 112, 0], fontSize: 9 },
-      footStyles: { fillColor: [160, 112, 0], textColor: [255, 232, 122], fontSize: 10, fontStyle: "bold" },
-      styles: { fontSize: 10 },
+      headStyles: { fillColor: [255, 248, 224], textColor: [160, 112, 0], fontSize: 8.5 },
+      footStyles: { fillColor: [160, 112, 0], textColor: [255, 232, 122], fontSize: 9, fontStyle: "bold" },
+      styles: { fontSize: 9, cellPadding: 1.5 },
       margin: { left: 14, right: 14 },
     });
 
-    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
   }
 
   doc.setFillColor(14, 32, 16);
   doc.setDrawColor(26, 74, 37);
-  const boxHeight = installationValue + setupValue > 0 ? 24 : 16;
+  const boxHeight = installationValue + setupValue > 0 ? 19 : 13;
   doc.roundedRect(14, y, 182, boxHeight, 2, 2, "FD");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(95, 163, 68);
-  doc.text("RESUMO FINANCEIRO", 20, y + 7);
+  doc.text("RESUMO FINANCEIRO", 20, y + 5.5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setTextColor(204, 204, 204);
-  doc.text("Total Mensal Recorrente", 20, y + 14);
+  doc.text("Total Mensal Recorrente", 20, y + 11.5);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
+  doc.setFontSize(11.5);
   doc.setTextColor(158, 241, 119);
-  doc.text(`${fmt(sale.monthly_value || 0)}/mês`, 190, y + 14, { align: "right" });
+  doc.text(`${fmt(sale.monthly_value || 0)}/mês`, 190, y + 11.5, { align: "right" });
   if (setupValue + installationValue > 0) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setTextColor(224, 160, 32);
-    doc.text("Setup — Pagamento Único (1ª fatura)", 20, y + 21);
+    doc.text("Setup — Pagamento Único (1ª fatura)", 20, y + 17);
     doc.setFont("helvetica", "bold");
-    doc.text(fmt(setupValue + installationValue), 190, y + 21, { align: "right" });
+    doc.text(fmt(setupValue + installationValue), 190, y + 17, { align: "right" });
   }
 
-  y += boxHeight + 10;
+  y += boxHeight + 6;
+  const obsHeight = 14;
   doc.setFillColor(255, 251, 240);
   doc.setDrawColor(224, 160, 32);
-  doc.rect(14, y, 1.2, 22, "F");
+  doc.rect(14, y, 1.2, obsHeight, "F");
   doc.setFillColor(255, 251, 240);
-  doc.rect(15.2, y, 180.8, 22, "F");
+  doc.rect(15.2, y, 180.8, obsHeight, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(85, 85, 85);
-  doc.text("Observações:", 20, y + 6);
+  doc.text("Observações:", 20, y + 5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
+  doc.setFontSize(7.5);
   const obs =
     "Valores mensais via boleto ou PIX. Setup e taxa de instalação cobrados uma única vez na ativação. Contrato mínimo de 12 meses. Esta proposta é válida por 15 dias a partir da data de sua emissão.";
-  doc.text(doc.splitTextToSize(obs, 172), 20, y + 12);
+  doc.text(doc.splitTextToSize(obs, 172), 20, y + 10);
 
-  y += 22 + 12;
-  if (y > 215) {
+  y += obsHeight + 8;
+  if (y > 240) {
     doc.addPage();
     y = 34;
   }
@@ -435,16 +436,16 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
   doc.setDrawColor(224, 224, 224);
   doc.line(14, y + 2, 196, y + 2);
 
-  y += 8;
+  y += 6;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(60, 60, 60);
   const termoLines = doc.splitTextToSize(
     "Ao assinar este documento, o(a) contratante declara estar de acordo com os serviços, valores e condições descritos nesta proposta comercial.",
     182,
   );
   doc.text(termoLines, 14, y);
-  y += termoLines.length * 4.2 + 4;
+  y += termoLines.length * 3.8 + 3;
 
   doc.setTextColor(160, 112, 0);
   const instalacaoLines = doc.splitTextToSize(
@@ -452,7 +453,7 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
     182,
   );
   doc.text(instalacaoLines, 14, y);
-  y += instalacaoLines.length * 4.2 + 16;
+  y += instalacaoLines.length * 3.8 + 10;
 
   doc.setDrawColor(150, 150, 150);
   doc.line(14, y, 95, y);

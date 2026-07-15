@@ -83,4 +83,5 @@ export type Pedido = {
   installed: boolean;
   installedAt: string | null;
   signedUrl: string | null;
+  partner?: Pick<Partner, "id" | "pessoa" | "nome_completo" | "fantasia" | "is_demo"> | null;
 };

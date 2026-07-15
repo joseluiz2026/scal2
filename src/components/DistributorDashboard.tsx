@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { generateMonthlyReportPdf } from "@/lib/pdfReport";
-import type { Message, Partner, Sale } from "@/lib/types";
+import type { Message, Partner, Pedido, Sale } from "@/lib/types";
 import { useToast } from "@/lib/useToast";
 import CredentialsModal from "./CredentialsModal";
 import DashboardCharts from "./dashboard/DashboardCharts";
@@ -14,11 +14,12 @@ import MessageForm from "./messages/MessageForm";
 import SentMessagesList from "./messages/SentMessagesList";
 import PartnerForm from "./PartnerForm";
 import PartnersList from "./PartnersList";
+import ClosedPedidosList from "./sales/ClosedPedidosList";
 import PendingQuotesList from "./sales/PendingQuotesList";
 import ScheduleList from "./sales/ScheduleList";
 import Toast from "./Toast";
 
-type Tab = "charts" | "quotes" | "partners" | "schedule";
+type Tab = "charts" | "quotes" | "partners" | "schedule" | "pedidos";
 
 export default function DistributorDashboard({ theme }: { theme: string }) {
   const [activeTab, setActiveTab] = useState<Tab>("charts");
@@ -27,6 +28,8 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
   const [sales, setSales] = useState<Sale[]>([]);
   const [salesLoading, setSalesLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [pedidosFechados, setPedidosFechados] = useState<Pedido[]>([]);
+  const [pedidosLoading, setPedidosLoading] = useState(true);
   const [credentials, setCredentials] = useState<{ name: string; username: string; password: string } | null>(null);
   const [showDemo, setShowDemo] = useState(true);
   const { message, showToast } = useToast();
@@ -70,6 +73,15 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
       .then(({ ok, data }) => {
         if (ok) setMessages(data.messages);
       });
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/pedidos")
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok) setPedidosFechados(data.pedidos);
+      })
+      .finally(() => setPedidosLoading(false));
   }, []);
 
   function toggleDemo(partner: Partner) {
@@ -224,6 +236,9 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
         <button className={activeTab === "schedule" ? "active" : ""} onClick={() => setActiveTab("schedule")}>
           Cronograma de comissões
         </button>
+        <button className={activeTab === "pedidos" ? "active" : ""} onClick={() => setActiveTab("pedidos")}>
+          Pedidos fechados no mês
+        </button>
       </div>
 
       {activeTab === "charts" && (
@@ -313,6 +328,16 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
             <span className="count">clique num mês pendente para marcar como pago</span>
           </div>
           {!salesLoading && <ScheduleList sales={scheduleSales} onChanged={loadSales} onError={showToast} />}
+        </>
+      )}
+
+      {activeTab === "pedidos" && (
+        <>
+          <div className="section-head">
+            <h2>Pedidos fechados no mês</h2>
+            <span className="count">{pedidosFechados.length} instalado{pedidosFechados.length === 1 ? "" : "s"}</span>
+          </div>
+          <ClosedPedidosList pedidos={pedidosFechados} loading={pedidosLoading} />
         </>
       )}
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { commissionRate, displayName, kindLabel } from "@/lib/commission";
 import { fmt } from "@/lib/format";
 import type { Partner, Sale } from "@/lib/types";
@@ -5,6 +8,8 @@ import Dial from "./Dial";
 import OneTimeLine from "./OneTimeLine";
 import PartnerNotaFiscal from "./PartnerNotaFiscal";
 import PartnerProposal from "./PartnerProposal";
+
+const PAGE_SIZE = 10;
 
 export default function SalesList({
   sales,
@@ -19,6 +24,8 @@ export default function SalesList({
   onChanged: () => void;
   onError: (message: string) => void;
 }) {
+  const [page, setPage] = useState(1);
+
   if (sales.length === 0) {
     return (
       <div className="card">
@@ -27,9 +34,13 @@ export default function SalesList({
     );
   }
 
+  const totalPages = Math.max(1, Math.ceil(sales.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageSales = sales.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
   return (
     <div className="card">
-      {sales.map((s) => {
+      {pageSales.map((s) => {
         const paidCount = (s.installments || []).filter((i) => i.status === "paid").length;
         const badgeClass = s.status === "aguardando_cotacao" ? "pending" : s.status === "cancelled" ? "cancelled" : "active";
         const badgeText = s.status === "aguardando_cotacao" ? "Aguardando cotação" : s.status === "cancelled" ? "Cancelada" : "Ativa";
@@ -65,6 +76,24 @@ export default function SalesList({
           </div>
         );
       })}
+
+      {totalPages > 1 && (
+        <div className="btn-row" style={{ justifyContent: "center", marginTop: 12 }}>
+          <button className="btn" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
+            ← Anterior
+          </button>
+          <span className="meta">
+            Página {currentPage} de {totalPages}
+          </span>
+          <button
+            className="btn"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Próxima →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

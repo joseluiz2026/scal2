@@ -10,11 +10,13 @@ export default function AdminProposal({
   partner,
   onChanged,
   onError,
+  onConfirmed,
 }: {
   sale: Sale;
   partner: Partner;
   onChanged: () => void;
   onError: (message: string) => void;
+  onConfirmed?: () => void;
 }) {
   const [busy, setBusy] = useState(false);
 
@@ -32,6 +34,7 @@ export default function AdminProposal({
         return;
       }
       onChanged();
+      onConfirmed?.();
     } finally {
       setBusy(false);
     }
@@ -60,7 +63,7 @@ export default function AdminProposal({
           🖨️ Ver proposta (PDF)
         </button>
         <button className="btn primary" onClick={confirm} disabled={busy}>
-          Confirmar proposta
+          Confirmar proposta e gerar pedido
         </button>
       </div>
     );

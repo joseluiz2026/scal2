@@ -400,6 +400,46 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
     "Valores mensais via boleto ou PIX. Setup e taxa de instalação cobrados uma única vez na ativação. Contrato mínimo de 12 meses. Esta proposta é válida por 15 dias a partir da data de sua emissão.";
   doc.text(doc.splitTextToSize(obs, 172), 20, y + 12);
 
+  y += 22 + 12;
+  if (y > 215) {
+    doc.addPage();
+    y = 20;
+  }
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(95, 163, 68);
+  doc.text("TERMO DE ACEITE", 14, y);
+  doc.setDrawColor(224, 224, 224);
+  doc.line(14, y + 2, 196, y + 2);
+
+  y += 8;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(60, 60, 60);
+  const termoLines = doc.splitTextToSize(
+    "Ao assinar este documento, o(a) contratante declara estar de acordo com os serviços, valores e condições descritos nesta proposta comercial.",
+    182,
+  );
+  doc.text(termoLines, 14, y);
+  y += termoLines.length * 4.2 + 4;
+
+  doc.setTextColor(160, 112, 0);
+  const instalacaoLines = doc.splitTextToSize(
+    "A instalação poderá ocorrer a qualquer momento, em até 15 (quinze) dias úteis, contados a partir da confirmação desta proposta pelo distribuidor.",
+    182,
+  );
+  doc.text(instalacaoLines, 14, y);
+  y += instalacaoLines.length * 4.2 + 16;
+
+  doc.setDrawColor(150, 150, 150);
+  doc.line(14, y, 95, y);
+  doc.line(125, y, 196, y);
+  doc.setFontSize(8);
+  doc.setTextColor(120, 120, 120);
+  doc.text("Assinatura do contratante", 14, y + 5);
+  doc.text("Data da assinatura", 125, y + 5);
+
   doc.setDrawColor(221, 221, 221);
   doc.line(14, 274, 196, 274);
   doc.setFont("helvetica", "normal");

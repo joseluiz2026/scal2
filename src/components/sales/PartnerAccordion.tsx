@@ -226,7 +226,7 @@ export default function PartnerAccordion({
                   </div>
                 )}
                 {!isCancelled && s.kind === "condominial" && (
-                  <AdminProposal sale={s} partner={partner} onChanged={onChanged} onError={onError} />
+                  <AdminProposal sale={s} partner={partner} onChanged={onChanged} onError={onError} onConfirmed={generatePedido} />
                 )}
               </>
             )}

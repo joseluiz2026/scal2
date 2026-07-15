@@ -72,24 +72,48 @@
   color: rgba(238, 242, 247, 0.5);
 }
 
-.landing-weblink {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 10px;
-  border: 1px solid rgba(238, 242, 247, 0.25);
-  color: #eef2f7;
-  font-weight: 600;
-  font-size: 14px;
-  text-decoration: none;
-  transition: all 0.15s ease;
+.landing-video-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 14px;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-.landing-weblink:hover {
-  border-color: #eef2f7;
-  background: rgba(238, 242, 247, 0.08);
+.landing-video-overlay.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.landing-video-overlay a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.landing-video-overlay .overlay-link {
+  background: rgba(18, 25, 36, 0.92);
+  color: #eef2f7;
+  border: 1px solid rgba(238, 242, 247, 0.25);
+}
+
+.landing-video-overlay .overlay-whatsapp {
+  background: #25d366;
+  color: #06210f;
 }
 
 .landing-card {

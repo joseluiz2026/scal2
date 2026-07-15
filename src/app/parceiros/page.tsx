@@ -12,6 +12,9 @@ const DEFAULT_SETTINGS: LandingSettings = {
   web_link_url: "",
   web_link_label: "Saiba mais",
   whatsapp_number: "",
+  show_web_link_button: true,
+  show_whatsapp_button: true,
+  button_reveal_percent: 0,
   updated_at: new Date(0).toISOString(),
 };
 

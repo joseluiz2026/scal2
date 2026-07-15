@@ -153,14 +153,20 @@ export default function PendingQuotesList({
               </div>
             </details>
             <div className="quote-action-row">
-              <label>Valor mensal</label>
-              <input type="number" placeholder="Ex: 180" value={f.monthly} onChange={(e) => setField(s.id, "monthly", e.target.value)} />
-              <label>Taxa de instalação</label>
-              <input type="number" placeholder="Ex: 300" value={f.install} onChange={(e) => setField(s.id, "install", e.target.value)} />
-              <label>Taxa de setup</label>
-              <input type="number" placeholder="Ex: 80" value={f.setup} onChange={(e) => setField(s.id, "setup", e.target.value)} />
+              <div className="quote-field">
+                <label>Valor mensal</label>
+                <input type="number" placeholder="Ex: 180" value={f.monthly} onChange={(e) => setField(s.id, "monthly", e.target.value)} />
+              </div>
+              <div className="quote-field">
+                <label>Taxa de instalação</label>
+                <input type="number" placeholder="Ex: 300" value={f.install} onChange={(e) => setField(s.id, "install", e.target.value)} />
+              </div>
+              <div className="quote-field">
+                <label>Taxa de setup</label>
+                <input type="number" placeholder="Ex: 80" value={f.setup} onChange={(e) => setField(s.id, "setup", e.target.value)} />
+              </div>
               {Boolean(s.client_data.boxPortao) && (
-                <>
+                <div className="quote-field">
                   <label>Valor Toque Box Portão</label>
                   <input
                     type="number"
@@ -168,10 +174,10 @@ export default function PendingQuotesList({
                     value={f.boxPortao}
                     onChange={(e) => setField(s.id, "boxPortao", e.target.value)}
                   />
-                </>
+                </div>
               )}
               {Boolean(s.client_data.boxGaragem) && (
-                <>
+                <div className="quote-field">
                   <label>Valor Toque Box Garagem</label>
                   <input
                     type="number"
@@ -179,7 +185,7 @@ export default function PendingQuotesList({
                     value={f.boxGaragem}
                     onChange={(e) => setField(s.id, "boxGaragem", e.target.value)}
                   />
-                </>
+                </div>
               )}
             </div>
             <div className="quote-action-row">

@@ -10,6 +10,9 @@ const DEFAULT_SETTINGS = {
   web_link_url: "",
   web_link_label: "Saiba mais",
   whatsapp_number: "",
+  show_web_link_button: true,
+  show_whatsapp_button: true,
+  button_reveal_percent: 0,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -37,6 +40,9 @@ export async function PATCH(request: Request) {
   const web_link_url = String(body.web_link_url || "").trim().slice(0, 500);
   const web_link_label = String(body.web_link_label || "Saiba mais").trim().slice(0, 60);
   const whatsapp_number = String(body.whatsapp_number || "").replace(/\D/g, "").slice(0, 20);
+  const show_web_link_button = Boolean(body.show_web_link_button);
+  const show_whatsapp_button = Boolean(body.show_whatsapp_button);
+  const button_reveal_percent = Math.min(100, Math.max(0, Math.round(Number(body.button_reveal_percent) || 0)));
 
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -48,6 +54,9 @@ export async function PATCH(request: Request) {
       web_link_url,
       web_link_label,
       whatsapp_number,
+      show_web_link_button,
+      show_whatsapp_button,
+      button_reveal_percent,
       updated_at: new Date().toISOString(),
     })
     .select()

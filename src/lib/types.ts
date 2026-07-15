@@ -83,6 +83,9 @@ export type LandingSettings = {
   web_link_url: string | null;
   web_link_label: string | null;
   whatsapp_number: string | null;
+  show_web_link_button: boolean;
+  show_whatsapp_button: boolean;
+  button_reveal_percent: number;
   updated_at: string;
 };
 

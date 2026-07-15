@@ -1,14 +1,22 @@
+export type VideoProvider = "youtube" | "vimeo" | "other";
+
 export function toEmbedUrl(url: string): string {
   const trimmed = url.trim();
   if (!trimmed) return "";
 
   const youtubeWatch = trimmed.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  if (youtubeWatch) return `https://www.youtube.com/embed/${youtubeWatch[1]}`;
+  if (youtubeWatch) return `https://www.youtube.com/embed/${youtubeWatch[1]}?enablejsapi=1`;
 
   const vimeo = trimmed.match(/vimeo\.com\/(\d+)/);
-  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}?api=1`;
 
   return trimmed;
+}
+
+export function videoProviderFromEmbedUrl(embedUrl: string): VideoProvider {
+  if (embedUrl.includes("youtube.com/embed")) return "youtube";
+  if (embedUrl.includes("player.vimeo.com")) return "vimeo";
+  return "other";
 }
 
 export function buildWhatsappLink(number: string, message: string): string {

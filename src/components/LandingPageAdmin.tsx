@@ -10,6 +10,9 @@ const FALLBACK_SETTINGS: LandingSettings = {
   web_link_url: "",
   web_link_label: "Saiba mais",
   whatsapp_number: "",
+  show_web_link_button: true,
+  show_whatsapp_button: true,
+  button_reveal_percent: 0,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -110,6 +113,35 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
               value={settings.web_link_url || ""}
               onChange={(e) => update("web_link_url", e.target.value)}
               placeholder="https://..."
+            />
+          </div>
+          <div className="checkbox-group">
+            <label className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={settings.show_web_link_button}
+                onChange={(e) => update("show_web_link_button", e.target.checked)}
+              />
+              <span>Mostrar botão de link</span>
+            </label>
+            <label className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={settings.show_whatsapp_button}
+                onChange={(e) => update("show_whatsapp_button", e.target.checked)}
+              />
+              <span>Mostrar botão de WhatsApp</span>
+            </label>
+          </div>
+          <div className="field span3">
+            <label>Exibir botão(ões) após {settings.button_reveal_percent}% do vídeo</label>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={settings.button_reveal_percent}
+              onChange={(e) => update("button_reveal_percent", Number(e.target.value))}
             />
           </div>
         </div>

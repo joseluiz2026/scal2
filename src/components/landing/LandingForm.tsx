@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { buildWhatsappLink, shadeColor, toEmbedUrl } from "@/lib/landing";
 import type { LandingSettings } from "@/lib/types";
+import { useVideoProgress } from "./useVideoProgress";
 
 export default function LandingForm({ settings }: { settings: LandingSettings }) {
   const [nome, setNome] = useState("");
@@ -10,10 +11,15 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
   const [cidade, setCidade] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const embedUrl = toEmbedUrl(settings.video_url || "");
   const bgFrom = settings.bg_color || "#0A121C";
   const bgTo = shadeColor(bgFrom, -18);
+  const progress = useVideoProgress(iframeRef, embedUrl);
+  const buttonsRevealed = progress >= (settings.button_reveal_percent || 0);
+  const showLinkButton = buttonsRevealed && settings.show_web_link_button && !!settings.web_link_url;
+  const showWhatsappButton = buttonsRevealed && settings.show_whatsapp_button && !!settings.whatsapp_number;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,16 +66,44 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
           </p>
           <div className="landing-video-wrap">
             {embedUrl ? (
-              <iframe src={embedUrl} title="Vídeo de apresentação" allow="autoplay; encrypted-media" allowFullScreen />
+              <iframe
+                ref={iframeRef}
+                src={embedUrl}
+                title="Vídeo de apresentação"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
             ) : (
               <div className="landing-video-placeholder">Vídeo em breve</div>
             )}
+            {(showLinkButton || showWhatsappButton) && (
+              <div className="landing-video-overlay visible">
+                {showLinkButton && (
+                  <a
+                    className="overlay-link"
+                    href={settings.web_link_url!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {settings.web_link_label || "Saiba mais"} ↗
+                  </a>
+                )}
+                {showWhatsappButton && (
+                  <a
+                    className="overlay-whatsapp"
+                    href={buildWhatsappLink(
+                      settings.whatsapp_number!,
+                      "Olá! Assisti ao vídeo e quero saber mais sobre ser parceiro Scal.",
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Falar no WhatsApp
+                  </a>
+                )}
+              </div>
+            )}
           </div>
-          {settings.web_link_url && (
-            <a className="landing-weblink" href={settings.web_link_url} target="_blank" rel="noopener noreferrer">
-              {settings.web_link_label || "Saiba mais"} ↗
-            </a>
-          )}
         </div>
 
         <div className="landing-card">

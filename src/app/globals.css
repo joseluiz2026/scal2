@@ -391,7 +391,8 @@
   .details-grid .field-pair dt{ font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.4px; }
   .details-grid .field-pair dd{ font-size:13px; font-family: var(--font-jetbrains-mono); margin-top:2px; }
 
-  .quote-action-row{ display:flex; gap:8px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+  .quote-action-row{ display:flex; gap:8px; align-items:flex-end; margin-top:14px; flex-wrap:wrap; }
+  .quote-action-row .quote-field{ display:flex; flex-direction:column; gap:6px; }
   .quote-action-row input{
     background: var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text);
     font-family: var(--font-jetbrains-mono); font-size:13px; padding: 9px 12px; width:170px;
@@ -504,6 +505,7 @@
     .row .row-value{ text-align:left; margin-left:52px; }
     .partner-group-head{ flex-direction:column; align-items:flex-start; }
     .partner-group-head .row-value{ margin-left:0; text-align:left; }
+    .quote-action-row .quote-field{ width:100%; }
     .quote-action-row input{ width:100%; }
     .checkbox-group{ flex-wrap:wrap; gap:14px; }
     .stat-card .value{ font-size:20px; }

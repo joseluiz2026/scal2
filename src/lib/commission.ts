@@ -15,3 +15,5 @@ export function displayName(kind: SaleKind, client: Record<string, unknown>) {
 }
 
 export const ONE_TIME_COMMISSION = 100;
+
+export const TOQUE_BOX_MONTHLY_PRICE = 33.9;

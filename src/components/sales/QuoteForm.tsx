@@ -37,6 +37,7 @@ export default function QuoteForm({
   const [cCep, setCCep] = useState("");
   const [cCidade, setCCidade] = useState("");
   const [cEndereco, setCEndereco] = useState("");
+  const [cPorte, setCPorte] = useState("Pequeno");
   const [cBoxPortao, setCBoxPortao] = useState(false);
   const [cBoxGaragem, setCBoxGaragem] = useState(false);
 
@@ -62,6 +63,7 @@ export default function QuoteForm({
     setCCep("");
     setCCidade("");
     setCEndereco("");
+    setCPorte("Pequeno");
     setCBoxPortao(false);
     setCBoxGaragem(false);
   }
@@ -103,6 +105,7 @@ export default function QuoteForm({
         cep: cCep.trim(),
         cidade: cCidade.trim(),
         endereco: cEndereco.trim(),
+        porte: cPorte,
         boxPortao: cBoxPortao,
         boxGaragem: cBoxGaragem,
       };
@@ -228,6 +231,14 @@ export default function QuoteForm({
           <div className="field">
             <label>Nº de apartamentos</label>
             <input type="number" placeholder="Ex: 48" value={cAptos} onChange={(e) => setCAptos(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Porte do condomínio</label>
+            <select value={cPorte} onChange={(e) => setCPorte(e.target.value)}>
+              <option value="Pequeno">Pequeno</option>
+              <option value="Médio">Médio</option>
+              <option value="Grande">Grande</option>
+            </select>
           </div>
           <div className="field">
             <label>CEP</label>

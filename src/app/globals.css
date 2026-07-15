@@ -115,7 +115,7 @@
   .brand-text [contenteditable="true"]:focus{ background: var(--surface-raised); box-shadow: 0 0 0 1px var(--copper); }
 
   .view-switch{
-    display:flex; background: var(--surface); border:1px solid var(--border);
+    display:flex; flex-wrap:wrap; background: var(--surface); border:1px solid var(--border);
     border-radius: 10px; padding:3px; gap:2px;
   }
   .view-switch button{

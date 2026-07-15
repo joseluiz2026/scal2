@@ -76,6 +76,24 @@ export type Message = {
   message_reads?: { partner_id: string }[];
 };
 
+export type LandingSettings = {
+  id: number;
+  bg_color: string;
+  video_url: string | null;
+  web_link_url: string | null;
+  web_link_label: string | null;
+  whatsapp_number: string | null;
+  updated_at: string;
+};
+
+export type LandingLead = {
+  id: string;
+  nome: string;
+  whatsapp: string;
+  cidade: string | null;
+  created_at: string;
+};
+
 export type Pedido = {
   id: string;
   createdAt: string;

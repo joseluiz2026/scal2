@@ -10,6 +10,7 @@ import DistStats from "./dashboard/DistStats";
 import KpiStack from "./dashboard/KpiStack";
 import OverviewCard from "./dashboard/OverviewCard";
 import RankingCard from "./dashboard/RankingCard";
+import LandingPageAdmin from "./LandingPageAdmin";
 import MessageForm from "./messages/MessageForm";
 import SentMessagesList from "./messages/SentMessagesList";
 import PartnerForm from "./PartnerForm";
@@ -19,7 +20,7 @@ import PendingQuotesList from "./sales/PendingQuotesList";
 import ScheduleList from "./sales/ScheduleList";
 import Toast from "./Toast";
 
-type Tab = "charts" | "quotes" | "partners" | "schedule" | "pedidos";
+type Tab = "charts" | "quotes" | "partners" | "schedule" | "pedidos" | "landing";
 
 export default function DistributorDashboard({ theme }: { theme: string }) {
   const [activeTab, setActiveTab] = useState<Tab>("charts");
@@ -239,6 +240,9 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
         <button className={activeTab === "pedidos" ? "active" : ""} onClick={() => setActiveTab("pedidos")}>
           Pedidos fechados no mês
         </button>
+        <button className={activeTab === "landing" ? "active" : ""} onClick={() => setActiveTab("landing")}>
+          Landing Page
+        </button>
       </div>
 
       {activeTab === "charts" && (
@@ -338,6 +342,15 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
             <span className="count">{pedidosFechados.length} instalado{pedidosFechados.length === 1 ? "" : "s"}</span>
           </div>
           <ClosedPedidosList pedidos={pedidosFechados} loading={pedidosLoading} />
+        </>
+      )}
+
+      {activeTab === "landing" && (
+        <>
+          <div className="section-head">
+            <h2>Landing Page de captação</h2>
+          </div>
+          <LandingPageAdmin onError={showToast} />
         </>
       )}
 

@@ -16,6 +16,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const monthlyValue = Number(body.monthlyValue);
   const installationValue = Number(body.installationValue) || 0;
   const setupValue = Number(body.setupValue) || 0;
+  const boxPortaoValue = Number(body.boxPortaoValue) || 0;
+  const boxGaragemValue = Number(body.boxGaragemValue) || 0;
 
   if (!monthlyValue || monthlyValue <= 0) {
     return NextResponse.json({ error: "Informe o valor mensal cotado antes de aprovar." }, { status: 400 });
@@ -43,6 +45,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       monthly_value: monthlyValue,
       installation_value: installationValue,
       setup_value: setupValue,
+      box_portao_value: boxPortaoValue,
+      box_garagem_value: boxGaragemValue,
       status: "active",
       one_time_status: oneTimeCommission > 0 ? "due" : null,
     })

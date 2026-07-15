@@ -7,6 +7,7 @@ import type { Message, Partner, Sale } from "@/lib/types";
 import PartnerCharts from "./dashboard/PartnerCharts";
 import PartnerStats from "./dashboard/PartnerStats";
 import PartnerMessages from "./messages/PartnerMessages";
+import PartnerPedidos from "./sales/PartnerPedidos";
 import QuoteForm from "./sales/QuoteForm";
 import ReceiptNotifications from "./sales/ReceiptNotifications";
 import SalesList from "./sales/SalesList";
@@ -112,6 +113,8 @@ export default function PartnerDashboard({
         }}
         onError={showToast}
       />
+
+      {partner && <PartnerPedidos partner={partner} onError={showToast} />}
 
       <div className="section-head">
         <h2>Relatório de vendas</h2>

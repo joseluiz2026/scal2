@@ -6,7 +6,7 @@ import { commissionRate, displayName, kindLabel, ONE_TIME_COMMISSION } from "@/l
 import { fmt } from "@/lib/format";
 import { generateSupplierOrderPdf } from "@/lib/pdfReport";
 import { buildPixPayload } from "@/lib/pix";
-import type { Partner, Sale } from "@/lib/types";
+import type { Partner, Pedido, Sale } from "@/lib/types";
 import AdminNotaFiscal from "./AdminNotaFiscal";
 import AdminProposal from "./AdminProposal";
 import Dial from "./Dial";
@@ -24,7 +24,7 @@ export default function PartnerAccordion({
   onError: (message: string) => void;
 }) {
   const [qrDataUrl, setQrDataUrl] = useState("");
-  const [pedidos, setPedidos] = useState<{ name: string; createdAt: string; signedUrl: string | null }[]>([]);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidosLoading, setPedidosLoading] = useState(true);
   const [generatingPedido, setGeneratingPedido] = useState(false);
 
@@ -32,7 +32,7 @@ export default function PartnerAccordion({
     fetch(`/api/partners/${partner.id}/pedido`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.files) setPedidos(data.files);
+        if (data.pedidos) setPedidos(data.pedidos);
       })
       .finally(() => setPedidosLoading(false));
   }, [partner.id]);
@@ -108,6 +108,7 @@ export default function PartnerAccordion({
     try {
       const formData = new FormData();
       formData.append("file", result.blob, "pedido.pdf");
+      formData.append("clientsCount", String(result.clientsCount));
       const res = await fetch(`/api/partners/${partner.id}/pedido`, { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) {
@@ -116,7 +117,7 @@ export default function PartnerAccordion({
       }
       const listRes = await fetch(`/api/partners/${partner.id}/pedido`);
       const listData = await listRes.json();
-      if (listData.files) setPedidos(listData.files);
+      if (listData.pedidos) setPedidos(listData.pedidos);
     } finally {
       setGeneratingPedido(false);
     }
@@ -168,16 +169,15 @@ export default function PartnerAccordion({
               Pedidos já arquivados:
             </div>
             <div className="btn-row" style={{ flexWrap: "wrap" }}>
-              {pedidos.map((f) => (
-                <a
-                  key={f.name}
-                  className="receipt-link"
-                  href={f.signedUrl || "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  📄 {new Date(f.createdAt).toLocaleDateString("pt-BR")} {new Date(f.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                </a>
+              {pedidos.map((p) => (
+                <span key={p.id} className="btn-row" style={{ gap: 4 }}>
+                  <a className="receipt-link" href={p.signedUrl || "#"} target="_blank" rel="noreferrer">
+                    📄 {new Date(p.createdAt).toLocaleDateString("pt-BR")}{" "}
+                    {new Date(p.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} ·{" "}
+                    {p.clientsCount} cliente{p.clientsCount === 1 ? "" : "s"}
+                  </a>
+                  {p.installed && <span className="badge active">✓ Instalado</span>}
+                </span>
               ))}
             </div>
           </div>

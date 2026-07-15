@@ -169,7 +169,7 @@ function clientProducts(client: Record<string, unknown>) {
 
 export function generateSupplierOrderPdf(partner: Partner, sales: Sale[]) {
   const activeSales = sales.filter((s) => s.status === "active");
-  if (activeSales.length === 0) return { opened: false, blob: null as Blob | null };
+  if (activeSales.length === 0) return { opened: false, blob: null as Blob | null, clientsCount: 0 };
 
   const doc = new jsPDF();
   const now = new Date();
@@ -270,7 +270,7 @@ export function generateSupplierOrderPdf(partner: Partner, sales: Sale[]) {
   const blob = doc.output("blob");
   const blobUrl = URL.createObjectURL(blob);
   const opened = !!window.open(blobUrl, "_blank");
-  return { opened, blob };
+  return { opened, blob, clientsCount: activeSales.length };
 }
 
 export function generateProposalPdf(partner: Partner, sale: Sale) {
@@ -340,11 +340,18 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
   doc.setTextColor(26, 106, 48);
   doc.text("SERVIÇOS MENSAIS RECORRENTES", 14, y);
 
+  const boxPortaoValue = sale.box_portao_value || 0;
+  const boxGaragemValue = sale.box_garagem_value || 0;
+  const serviceRows: string[][] = [[recurringServiceLabel(client), "MENSAL", `${fmt(sale.monthly_value || 0)}/mês`]];
+  if (client?.boxPortao) serviceRows.push(["📦 Toque Box Portão", "MENSAL", `${fmt(boxPortaoValue)}/mês`]);
+  if (client?.boxGaragem) serviceRows.push(["📦 Toque Box Garagem", "MENSAL", `${fmt(boxGaragemValue)}/mês`]);
+  const monthlyTotal = (sale.monthly_value || 0) + boxPortaoValue + boxGaragemValue;
+
   autoTable(doc, {
     startY: y + 3,
     head: [["SERVIÇO", "RECORRÊNCIA", "VALOR"]],
-    body: [[recurringServiceLabel(client), "MENSAL", `${fmt(sale.monthly_value || 0)}/mês`]],
-    foot: [["TOTAL MENSAL — SERVIÇOS", "", `${fmt(sale.monthly_value || 0)}/mês`]],
+    body: serviceRows,
+    foot: [["TOTAL MENSAL — SERVIÇOS", "", `${fmt(monthlyTotal)}/mês`]],
     theme: "striped",
     headStyles: { fillColor: [232, 245, 224], textColor: [45, 106, 48], fontSize: 8.5 },
     footStyles: { fillColor: [26, 74, 37], textColor: [158, 241, 119], fontSize: 9, fontStyle: "bold" },
@@ -396,7 +403,7 @@ export function generateProposalPdf(partner: Partner, sale: Sale) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11.5);
   doc.setTextColor(158, 241, 119);
-  doc.text(`${fmt(sale.monthly_value || 0)}/mês`, 190, y + 11.5, { align: "right" });
+  doc.text(`${fmt(monthlyTotal)}/mês`, 190, y + 11.5, { align: "right" });
   if (setupValue + installationValue > 0) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);

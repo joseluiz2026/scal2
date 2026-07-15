@@ -57,6 +57,8 @@ export type Sale = {
   status: SaleStatus;
   sale_date: string;
   created_at: string;
+  box_portao_value: number | null;
+  box_garagem_value: number | null;
   proposal_url: string | null;
   proposal_confirmed: boolean;
   proposal_confirmed_at: string | null;
@@ -72,4 +74,13 @@ export type Message = {
   body: string;
   created_at: string;
   message_reads?: { partner_id: string }[];
+};
+
+export type Pedido = {
+  id: string;
+  createdAt: string;
+  clientsCount: number;
+  installed: boolean;
+  installedAt: string | null;
+  signedUrl: string | null;
 };

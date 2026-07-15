@@ -1,5 +1,3 @@
-import { TOQUE_BOX_MONTHLY_PRICE } from "./commission";
-import { fmt } from "./format";
 import type { Sale } from "./types";
 
 export function proposalNumber(sale: Sale) {
@@ -11,16 +9,7 @@ export function proposalNumber(sale: Sale) {
 export function recurringServiceLabel(clientData: Record<string, unknown>) {
   const aptos = String(clientData?.aptos ?? "").trim();
   const porte = String(clientData?.porte ?? "").trim();
-  const main = aptos
+  return aptos
     ? `📡 Interfonia — ${aptos} unidades${porte ? ` (Porte ${porte})` : ""}`
     : "📡 Interfonia Condominial";
-
-  const addons: string[] = [];
-  if (clientData?.boxPortao) addons.push("Toque Box Portão");
-  if (clientData?.boxGaragem) addons.push("Toque Box Garagem");
-
-  if (!addons.length) return main;
-
-  const addonTotal = addons.length * TOQUE_BOX_MONTHLY_PRICE;
-  return `${main}\n↳ Inclui ${addons.join(" + ")} (+${fmt(addonTotal)}/mês)`;
 }

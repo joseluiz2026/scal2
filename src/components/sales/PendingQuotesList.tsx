@@ -51,19 +51,21 @@ export default function PendingQuotesList({
   onChanged: () => void;
   onError: (message: string) => void;
 }) {
-  const [values, setValues] = useState<Record<string, { monthly: string; install: string; setup: string }>>({});
+  const [values, setValues] = useState<
+    Record<string, { monthly: string; install: string; setup: string; boxPortao: string; boxGaragem: string }>
+  >({});
   const [busyId, setBusyId] = useState<string | null>(null);
 
   function fieldsFor(id: string) {
-    return values[id] || { monthly: "", install: "", setup: "" };
+    return values[id] || { monthly: "", install: "", setup: "", boxPortao: "", boxGaragem: "" };
   }
 
-  function setField(id: string, key: "monthly" | "install" | "setup", value: string) {
+  function setField(id: string, key: "monthly" | "install" | "setup" | "boxPortao" | "boxGaragem", value: string) {
     setValues((prev) => ({ ...prev, [id]: { ...fieldsFor(id), [key]: value } }));
   }
 
   async function approve(sale: Sale) {
-    const { monthly, install, setup } = fieldsFor(sale.id);
+    const { monthly, install, setup, boxPortao, boxGaragem } = fieldsFor(sale.id);
     const monthlyValue = parseFloat(monthly);
     if (!monthlyValue || monthlyValue <= 0) {
       onError("Informe o valor mensal cotado antes de aprovar");
@@ -78,6 +80,8 @@ export default function PendingQuotesList({
           monthlyValue,
           installationValue: parseFloat(install) || 0,
           setupValue: parseFloat(setup) || 0,
+          boxPortaoValue: parseFloat(boxPortao) || 0,
+          boxGaragemValue: parseFloat(boxGaragem) || 0,
         }),
       });
       const data = await res.json();
@@ -155,6 +159,28 @@ export default function PendingQuotesList({
               <input type="number" placeholder="Ex: 300" value={f.install} onChange={(e) => setField(s.id, "install", e.target.value)} />
               <label>Taxa de setup</label>
               <input type="number" placeholder="Ex: 80" value={f.setup} onChange={(e) => setField(s.id, "setup", e.target.value)} />
+              {Boolean(s.client_data.boxPortao) && (
+                <>
+                  <label>Valor Toque Box Portão</label>
+                  <input
+                    type="number"
+                    placeholder="Ex: 33.90"
+                    value={f.boxPortao}
+                    onChange={(e) => setField(s.id, "boxPortao", e.target.value)}
+                  />
+                </>
+              )}
+              {Boolean(s.client_data.boxGaragem) && (
+                <>
+                  <label>Valor Toque Box Garagem</label>
+                  <input
+                    type="number"
+                    placeholder="Ex: 33.90"
+                    value={f.boxGaragem}
+                    onChange={(e) => setField(s.id, "boxGaragem", e.target.value)}
+                  />
+                </>
+              )}
             </div>
             <div className="quote-action-row">
               <button className="btn primary" onClick={() => approve(s)} disabled={busyId === s.id}>

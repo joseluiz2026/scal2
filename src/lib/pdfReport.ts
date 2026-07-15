@@ -2,6 +2,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { commissionRate, displayName, kindLabel } from "./commission";
 import { fmt } from "./format";
+import { proposalNumber, recurringServiceLabel } from "./proposal";
 import type { Partner, Sale } from "./types";
 
 function partnerName(p: Partner) {
@@ -248,6 +249,178 @@ export function generateSupplierOrderPdf(partner: Partner, sales: Sale[]) {
   const blobUrl = URL.createObjectURL(blob);
   const opened = !!window.open(blobUrl, "_blank");
   return { opened, blob };
+}
+
+export function generateProposalPdf(partner: Partner, sale: Sale) {
+  const doc = new jsPDF();
+  const now = new Date();
+  const client = sale.client_data;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(20, 25, 35);
+  doc.text("Toque AI", 14, 18);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(140);
+  doc.text("Tecnologia que conecta, protege e aproxima", 14, 23);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(20, 25, 35);
+  doc.text("PROPOSTA COMERCIAL", 196, 16, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Nº ${proposalNumber(sale)}`, 196, 21, { align: "right" });
+  doc.text(now.toLocaleDateString("pt-BR"), 196, 26, { align: "right" });
+
+  doc.setDrawColor(26, 74, 37);
+  doc.setLineWidth(0.7);
+  doc.line(14, 30, 196, 30);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(26, 74, 37);
+  doc.text(`Proposta de Serviços — Toque AI — ${displayName("condominial", client)}`, 105, 39, { align: "center" });
+
+  let y = 49;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(95, 163, 68);
+  doc.text("DADOS DO CONTRATANTE", 14, y);
+  doc.setDrawColor(224, 224, 224);
+  doc.line(14, y + 2, 196, y + 2);
+
+  const razaoSocial = String(client?.razaoSocial ?? client?.nomeCondominio ?? "");
+  const cnpj = String(client?.cnpj ?? "");
+  const responsavel = String(client?.responsavel ?? "");
+  const tel = String(client?.tel ?? "");
+  const cidade = String(client?.cidade ?? "");
+  const endereco = `${String(client?.endereco ?? "")}${cidade ? ` · ${cidade}` : ""}`;
+
+  autoTable(doc, {
+    startY: y + 6,
+    body: [
+      ["Razão Social", razaoSocial, "CNPJ/CPF", cnpj],
+      ["Contato", responsavel, "Telefone", tel],
+      ["Endereço", endereco, "", ""],
+    ],
+    theme: "plain",
+    styles: { fontSize: 10, cellPadding: 1.5 },
+    columnStyles: { 0: { textColor: 110, cellWidth: 28 }, 2: { textColor: 110, cellWidth: 24 } },
+    margin: { left: 14, right: 14 },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(26, 106, 48);
+  doc.text("SERVIÇOS MENSAIS RECORRENTES", 14, y);
+
+  autoTable(doc, {
+    startY: y + 4,
+    head: [["SERVIÇO", "RECORRÊNCIA", "VALOR"]],
+    body: [[recurringServiceLabel(client), "MENSAL", `${fmt(sale.monthly_value || 0)}/mês`]],
+    foot: [["TOTAL MENSAL — SERVIÇOS", "", `${fmt(sale.monthly_value || 0)}/mês`]],
+    theme: "striped",
+    headStyles: { fillColor: [232, 245, 224], textColor: [45, 106, 48], fontSize: 9 },
+    footStyles: { fillColor: [26, 74, 37], textColor: [158, 241, 119], fontSize: 10, fontStyle: "bold" },
+    styles: { fontSize: 10 },
+    margin: { left: 14, right: 14 },
+  });
+
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+
+  const setupValue = sale.setup_value || 0;
+  const installationValue = sale.installation_value || 0;
+  if (setupValue > 0 || installationValue > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(160, 112, 0);
+    doc.text("SETUP — PAGAMENTO ÚNICO (NA ATIVAÇÃO)", 14, y);
+
+    const setupRows: string[][] = [];
+    if (setupValue > 0) setupRows.push(["Setup Interfonia", "ÚNICO", fmt(setupValue)]);
+    if (installationValue > 0) setupRows.push(["Taxa de Instalação", "ÚNICO", fmt(installationValue)]);
+
+    autoTable(doc, {
+      startY: y + 4,
+      head: [["DESCRIÇÃO", "TIPO", "VALOR"]],
+      body: setupRows,
+      foot: [["TOTAL SETUP", "", fmt(setupValue + installationValue)]],
+      theme: "striped",
+      headStyles: { fillColor: [255, 248, 224], textColor: [160, 112, 0], fontSize: 9 },
+      footStyles: { fillColor: [160, 112, 0], textColor: [255, 232, 122], fontSize: 10, fontStyle: "bold" },
+      styles: { fontSize: 10 },
+      margin: { left: 14, right: 14 },
+    });
+
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+  }
+
+  doc.setFillColor(14, 32, 16);
+  doc.setDrawColor(26, 74, 37);
+  const boxHeight = installationValue + setupValue > 0 ? 24 : 16;
+  doc.roundedRect(14, y, 182, boxHeight, 2, 2, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(95, 163, 68);
+  doc.text("RESUMO FINANCEIRO", 20, y + 7);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(204, 204, 204);
+  doc.text("Total Mensal Recorrente", 20, y + 14);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(158, 241, 119);
+  doc.text(`${fmt(sale.monthly_value || 0)}/mês`, 190, y + 14, { align: "right" });
+  if (setupValue + installationValue > 0) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(224, 160, 32);
+    doc.text("Setup — Pagamento Único (1ª fatura)", 20, y + 21);
+    doc.setFont("helvetica", "bold");
+    doc.text(fmt(setupValue + installationValue), 190, y + 21, { align: "right" });
+  }
+
+  y += boxHeight + 10;
+  doc.setFillColor(255, 251, 240);
+  doc.setDrawColor(224, 160, 32);
+  doc.rect(14, y, 1.2, 22, "F");
+  doc.setFillColor(255, 251, 240);
+  doc.rect(15.2, y, 180.8, 22, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(85, 85, 85);
+  doc.text("Observações:", 20, y + 6);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  const obs =
+    "Valores mensais via boleto ou PIX. Setup e taxa de instalação cobrados uma única vez na ativação. Contrato mínimo de 12 meses. Esta proposta é válida por 15 dias a partir da data de sua emissão.";
+  doc.text(doc.splitTextToSize(obs, 172), 20, y + 12);
+
+  doc.setDrawColor(221, 221, 221);
+  doc.line(14, 274, 196, 274);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(102, 102, 102);
+  doc.text("toqueai.com.br · comercial@toqueai.com.br", 14, 280);
+  doc.setTextColor(136, 136, 136);
+  doc.text("Toqueai Serviços de Informação na Internet LTDA", 14, 285);
+  doc.text("CNPJ: 59.969.655/0001-15 · Telefone/Whatsapp: (31) 2181-0061", 14, 290);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(26, 74, 37);
+  doc.text("Proposta gerada por", 196, 280, { align: "right" });
+  doc.setFontSize(10);
+  doc.text(partnerName(partner), 196, 285, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(85, 85, 85);
+  doc.text(partner.telefone || "-", 196, 290, { align: "right" });
+
+  return openGeneratedPdf(doc);
 }
 
 export function generateMonthlyReportPdf(partners: Partner[], sales: Sale[]) {

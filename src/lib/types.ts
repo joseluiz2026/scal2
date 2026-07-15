@@ -57,6 +57,10 @@ export type Sale = {
   status: SaleStatus;
   sale_date: string;
   created_at: string;
+  proposal_url: string | null;
+  proposal_confirmed: boolean;
+  proposal_confirmed_at: string | null;
+  proposal_signed_url?: string | null;
   installments?: Installment[];
   partners?: SalePartnerSummary;
 };

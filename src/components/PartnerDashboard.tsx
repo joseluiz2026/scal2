@@ -117,7 +117,7 @@ export default function PartnerDashboard({
         <h2>Relatório de vendas</h2>
         <span className="count">{sales.length} no total</span>
       </div>
-      {partner && <SalesList sales={sales} partnerRate={partner.rate} onChanged={reloadSales} onError={showToast} />}
+      {partner && <SalesList sales={sales} partner={partner} partnerRate={partner.rate} onChanged={reloadSales} onError={showToast} />}
 
       <Toast message={message} />
     </div>

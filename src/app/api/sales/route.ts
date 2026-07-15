@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
 import { getPartnerByAuthId } from "@/lib/currentPartner";
-import { withSignedUrls } from "@/lib/storage";
+import { signedUrl, withSignedUrls } from "@/lib/storage";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Installment } from "@/lib/types";
@@ -22,7 +22,11 @@ export async function GET() {
       .order("created_at", { ascending: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     const sales = await Promise.all(
-      (data || []).map(async (s) => ({ ...s, installments: await withSignedUrls((s.installments || []) as Installment[]) })),
+      (data || []).map(async (s) => ({
+        ...s,
+        installments: await withSignedUrls((s.installments || []) as Installment[]),
+        proposal_signed_url: await signedUrl(s.proposal_url),
+      })),
     );
     return NextResponse.json({ sales });
   }
@@ -37,7 +41,11 @@ export async function GET() {
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   const sales = await Promise.all(
-    (data || []).map(async (s) => ({ ...s, installments: await withSignedUrls((s.installments || []) as Installment[]) })),
+    (data || []).map(async (s) => ({
+      ...s,
+      installments: await withSignedUrls((s.installments || []) as Installment[]),
+      proposal_signed_url: await signedUrl(s.proposal_url),
+    })),
   );
   return NextResponse.json({ sales });
 }

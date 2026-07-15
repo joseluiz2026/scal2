@@ -8,6 +8,7 @@ import { generateSupplierOrderPdf } from "@/lib/pdfReport";
 import { buildPixPayload } from "@/lib/pix";
 import type { Partner, Sale } from "@/lib/types";
 import AdminNotaFiscal from "./AdminNotaFiscal";
+import AdminProposal from "./AdminProposal";
 import Dial from "./Dial";
 import OneTimeLine from "./OneTimeLine";
 
@@ -223,6 +224,9 @@ export default function PartnerAccordion({
                   <div style={{ marginTop: 10 }}>
                     <AdminNotaFiscal installment={dueInstallment} onChanged={onChanged} onError={onError} />
                   </div>
+                )}
+                {!isCancelled && s.kind === "condominial" && (
+                  <AdminProposal sale={s} partner={partner} onChanged={onChanged} onError={onError} />
                 )}
               </>
             )}

@@ -1,17 +1,20 @@
 import { commissionRate, displayName, kindLabel } from "@/lib/commission";
 import { fmt } from "@/lib/format";
-import type { Sale } from "@/lib/types";
+import type { Partner, Sale } from "@/lib/types";
 import Dial from "./Dial";
 import OneTimeLine from "./OneTimeLine";
 import PartnerNotaFiscal from "./PartnerNotaFiscal";
+import PartnerProposal from "./PartnerProposal";
 
 export default function SalesList({
   sales,
+  partner,
   partnerRate,
   onChanged,
   onError,
 }: {
   sales: Sale[];
+  partner: Partner;
   partnerRate: number;
   onChanged: () => void;
   onError: (message: string) => void;
@@ -55,6 +58,9 @@ export default function SalesList({
             <OneTimeLine sale={s} editable={false} />
             {s.status === "active" && dueInstallment && (
               <PartnerNotaFiscal installment={dueInstallment} onUploaded={onChanged} onError={onError} />
+            )}
+            {s.kind === "condominial" && s.status === "active" && (
+              <PartnerProposal sale={s} partner={partner} onUploaded={onChanged} onError={onError} />
             )}
           </div>
         );

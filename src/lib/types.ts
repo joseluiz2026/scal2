@@ -76,6 +76,8 @@ export type Message = {
   message_reads?: { partner_id: string }[];
 };
 
+export type BgMediaType = "none" | "image" | "video";
+
 export type LandingSettings = {
   id: number;
   bg_color: string;
@@ -86,6 +88,9 @@ export type LandingSettings = {
   show_web_link_button: boolean;
   show_whatsapp_button: boolean;
   button_reveal_percent: number;
+  bg_media_type: BgMediaType;
+  bg_media_url: string | null;
+  bg_media_opacity: number;
   updated_at: string;
 };
 

@@ -13,6 +13,9 @@ const DEFAULT_SETTINGS = {
   show_web_link_button: true,
   show_whatsapp_button: true,
   button_reveal_percent: 0,
+  bg_media_type: "none",
+  bg_media_url: "",
+  bg_media_opacity: 100,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -43,6 +46,9 @@ export async function PATCH(request: Request) {
   const show_web_link_button = Boolean(body.show_web_link_button);
   const show_whatsapp_button = Boolean(body.show_whatsapp_button);
   const button_reveal_percent = Math.min(100, Math.max(0, Math.round(Number(body.button_reveal_percent) || 0)));
+  const bg_media_type = ["image", "video"].includes(body.bg_media_type) ? body.bg_media_type : "none";
+  const bg_media_url = String(body.bg_media_url || "").trim().slice(0, 500);
+  const bg_media_opacity = Math.min(100, Math.max(0, Math.round(Number(body.bg_media_opacity) ?? 100)));
 
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -57,6 +63,9 @@ export async function PATCH(request: Request) {
       show_web_link_button,
       show_whatsapp_button,
       button_reveal_percent,
+      bg_media_type,
+      bg_media_url,
+      bg_media_opacity,
       updated_at: new Date().toISOString(),
     })
     .select()

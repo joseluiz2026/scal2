@@ -56,6 +56,26 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
       className="landing-page"
       style={{ background: `radial-gradient(circle at 30% 20%, ${bgTo} 0%, ${bgFrom} 60%)` }}
     >
+      {settings.bg_media_type === "image" && settings.bg_media_url && (
+        // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-supplied URL, not an optimizable local asset
+        <img
+          src={settings.bg_media_url}
+          alt=""
+          className="landing-bg-media"
+          style={{ opacity: settings.bg_media_opacity / 100 }}
+        />
+      )}
+      {settings.bg_media_type === "video" && settings.bg_media_url && (
+        <video
+          src={settings.bg_media_url}
+          className="landing-bg-media"
+          style={{ opacity: settings.bg_media_opacity / 100 }}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      )}
       <div className="landing-shell">
         <div className="landing-video-col">
           <div className="landing-eyebrow">Toque Aí · Seja um parceiro</div>

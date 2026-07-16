@@ -15,6 +15,9 @@ const DEFAULT_SETTINGS: LandingSettings = {
   show_web_link_button: true,
   show_whatsapp_button: true,
   button_reveal_percent: 0,
+  bg_media_type: "none",
+  bg_media_url: "",
+  bg_media_opacity: 100,
   updated_at: new Date(0).toISOString(),
 };
 

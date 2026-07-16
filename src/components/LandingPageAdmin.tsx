@@ -13,6 +13,9 @@ const FALLBACK_SETTINGS: LandingSettings = {
   show_web_link_button: true,
   show_whatsapp_button: true,
   button_reveal_percent: 0,
+  bg_media_type: "none",
+  bg_media_url: "",
+  bg_media_opacity: 100,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -144,6 +147,40 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
               onChange={(e) => update("button_reveal_percent", Number(e.target.value))}
             />
           </div>
+          <div className="field">
+            <label>Mídia de fundo</label>
+            <select
+              value={settings.bg_media_type}
+              onChange={(e) => update("bg_media_type", e.target.value as LandingSettings["bg_media_type"])}
+            >
+              <option value="none">Nenhuma (só a cor)</option>
+              <option value="image">Imagem</option>
+              <option value="video">Vídeo</option>
+            </select>
+          </div>
+          {settings.bg_media_type !== "none" && (
+            <>
+              <div className="field span2">
+                <label>URL {settings.bg_media_type === "image" ? "da imagem" : "do vídeo"} de fundo</label>
+                <input
+                  value={settings.bg_media_url || ""}
+                  onChange={(e) => update("bg_media_url", e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="field span3">
+                <label>Transparência da mídia de fundo ({settings.bg_media_opacity}% visível)</label>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={settings.bg_media_opacity}
+                  onChange={(e) => update("bg_media_opacity", Number(e.target.value))}
+                />
+              </div>
+            </>
+          )}
         </div>
         <div className="submit-row">
           <a className="btn" href="/parceiros" target="_blank" rel="noopener noreferrer">

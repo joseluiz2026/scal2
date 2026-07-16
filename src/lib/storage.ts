@@ -9,9 +9,15 @@ async function ensurePublicBucket() {
   if (!publicBucketReady) {
     publicBucketReady = (async () => {
       const admin = createAdminClient();
+      const { data: existing } = await admin.storage.getBucket(PUBLIC_BUCKET);
+      if (existing) return;
+
+      // Kept under the project's global storage file-size cap — a bucket-level limit
+      // above that cap makes createBucket fail every time with a 413, not an
+      // "already exists" error, so this can't be caught by checking the error message.
       const { error } = await admin.storage.createBucket(PUBLIC_BUCKET, {
         public: true,
-        fileSizeLimit: "100MB",
+        fileSizeLimit: "50MB",
         allowedMimeTypes: ["video/mp4", "video/webm"],
       });
       if (error && !/already exists/i.test(error.message)) throw error;

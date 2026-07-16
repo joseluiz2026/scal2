@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { LandingLead, LandingSettings } from "@/lib/types";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
-const MAX_BG_VIDEO_BYTES = 100 * 1024 * 1024; // matches the storage bucket's fileSizeLimit
+const MAX_BG_VIDEO_BYTES = 50 * 1024 * 1024; // matches the storage bucket's fileSizeLimit
 const ALLOWED_BG_VIDEO_TYPES = ["video/mp4", "video/webm"];
 
 const FALLBACK_SETTINGS: LandingSettings = {
@@ -81,7 +81,7 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
       return;
     }
     if (file.size > MAX_BG_VIDEO_BYTES) {
-      onError("O vídeo excede o limite de 100MB.");
+      onError("O vídeo excede o limite de 50MB.");
       return;
     }
 
@@ -218,16 +218,19 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
           {settings.bg_media_type !== "none" && (
             <>
               <div className="field span2">
-                <label>URL {settings.bg_media_type === "image" ? "da imagem" : "do vídeo"} de fundo</label>
+                <label>
+                  URL {settings.bg_media_type === "image" ? "da imagem" : "do vídeo"} de fundo
+                  {settings.bg_media_type !== "image" && " (arquivo .mp4/.webm direto — não é link do YouTube/Vimeo)"}
+                </label>
                 <input
                   value={settings.bg_media_url || ""}
                   onChange={(e) => update("bg_media_url", e.target.value)}
-                  placeholder="https://..."
+                  placeholder={settings.bg_media_type === "image" ? "https://..." : "https://.../video.mp4"}
                 />
               </div>
               {(settings.bg_media_type === "video" || settings.bg_media_type === "color_video") && (
                 <div className="field span3">
-                  <label>Ou envie um arquivo de vídeo (.mp4 ou .webm, até 100MB)</label>
+                  <label>Ou envie um arquivo de vídeo (.mp4 ou .webm, até 50MB)</label>
                   <input
                     type="file"
                     accept="video/mp4,video/webm"

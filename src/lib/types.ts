@@ -76,7 +76,7 @@ export type Message = {
   message_reads?: { partner_id: string }[];
 };
 
-export type BgMediaType = "none" | "image" | "video";
+export type BgMediaType = "none" | "image" | "video" | "color_video";
 
 export type LandingSettings = {
   id: number;

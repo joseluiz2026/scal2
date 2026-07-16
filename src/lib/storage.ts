@@ -1,6 +1,40 @@
 import { createAdminClient } from "./supabase/admin";
 
 const BUCKET = "scal-files";
+const PUBLIC_BUCKET = "scal-public";
+
+let publicBucketReady: Promise<void> | null = null;
+
+async function ensurePublicBucket() {
+  if (!publicBucketReady) {
+    publicBucketReady = (async () => {
+      const admin = createAdminClient();
+      const { error } = await admin.storage.createBucket(PUBLIC_BUCKET, {
+        public: true,
+        fileSizeLimit: "100MB",
+        allowedMimeTypes: ["video/mp4", "video/webm"],
+      });
+      if (error && !/already exists/i.test(error.message)) throw error;
+    })();
+  }
+  return publicBucketReady;
+}
+
+// Public, browser-visible media (e.g. landing page background video) — uploaded directly
+// from the client to Supabase Storage via a signed URL, bypassing the server so large
+// video files never touch the Next.js function body-size limit.
+export async function createPublicUploadUrl(path: string) {
+  await ensurePublicBucket();
+  const admin = createAdminClient();
+  const { data, error } = await admin.storage.from(PUBLIC_BUCKET).createSignedUploadUrl(path);
+  if (error) throw error;
+  return data;
+}
+
+export function publicFileUrl(path: string) {
+  const admin = createAdminClient();
+  return admin.storage.from(PUBLIC_BUCKET).getPublicUrl(path).data.publicUrl;
+}
 
 export async function uploadFile(path: string, file: File) {
   const admin = createAdminClient();

@@ -16,6 +16,8 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
   const embedUrl = toEmbedUrl(settings.video_url || "");
   const bgFrom = settings.bg_color || "#0A121C";
   const bgTo = shadeColor(bgFrom, -18);
+  const isColorVideo = settings.bg_media_type === "color_video";
+  const pageBackground = isColorVideo ? bgFrom : `radial-gradient(circle at 30% 20%, ${bgTo} 0%, ${bgFrom} 60%)`;
   const progress = useVideoProgress(iframeRef, embedUrl);
   const buttonsRevealed = progress >= (settings.button_reveal_percent || 0);
   const showLinkButton = buttonsRevealed && settings.show_web_link_button && !!settings.web_link_url;
@@ -52,10 +54,7 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
   }
 
   return (
-    <div
-      className="landing-page"
-      style={{ background: `radial-gradient(circle at 30% 20%, ${bgTo} 0%, ${bgFrom} 60%)` }}
-    >
+    <div className="landing-page" style={{ background: pageBackground }}>
       {settings.bg_media_type === "image" && settings.bg_media_url && (
         // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-supplied URL, not an optimizable local asset
         <img
@@ -75,6 +74,15 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
           muted
           playsInline
         />
+      )}
+      {isColorVideo && settings.bg_media_url && (
+        <>
+          <video src={settings.bg_media_url} className="landing-bg-media" autoPlay loop muted playsInline />
+          <div
+            className="landing-bg-color-overlay"
+            style={{ background: bgFrom, opacity: settings.bg_media_opacity / 100 }}
+          />
+        </>
       )}
       <div className="landing-shell">
         <div className="landing-video-col">

@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import type { LandingLead, LandingSettings } from "@/lib/types";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
+
+const MAX_BG_VIDEO_BYTES = 100 * 1024 * 1024; // matches the storage bucket's fileSizeLimit
+const ALLOWED_BG_VIDEO_TYPES = ["video/mp4", "video/webm"];
 
 const FALLBACK_SETTINGS: LandingSettings = {
   id: 1,
@@ -24,6 +28,7 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
   const [leads, setLeads] = useState<LandingLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingBgVideo, setUploadingBgVideo] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -68,6 +73,46 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
 
   function update<K extends keyof LandingSettings>(key: K, value: LandingSettings[K]) {
     setSettings((prev) => (prev ? { ...prev, [key]: value } : prev));
+  }
+
+  async function handleBgVideoUpload(file: File) {
+    if (!ALLOWED_BG_VIDEO_TYPES.includes(file.type)) {
+      onError("Envie um arquivo de vídeo .mp4 ou .webm.");
+      return;
+    }
+    if (file.size > MAX_BG_VIDEO_BYTES) {
+      onError("O vídeo excede o limite de 100MB.");
+      return;
+    }
+
+    setUploadingBgVideo(true);
+    try {
+      const prepRes = await fetch("/api/landing/bg-media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentType: file.type }),
+      });
+      const prepData = await prepRes.json();
+      if (!prepRes.ok) {
+        onError(prepData.error || "Não foi possível preparar o envio do vídeo.");
+        return;
+      }
+
+      const supabase = createBrowserClient();
+      const { error: uploadError } = await supabase.storage
+        .from("scal-public")
+        .uploadToSignedUrl(prepData.path, prepData.token, file, { contentType: file.type });
+      if (uploadError) {
+        onError("Não foi possível enviar o vídeo.");
+        return;
+      }
+
+      update("bg_media_url", prepData.publicUrl);
+    } catch {
+      onError("Não foi possível conectar. Tente novamente.");
+    } finally {
+      setUploadingBgVideo(false);
+    }
   }
 
   if (loading || !settings) {
@@ -151,11 +196,23 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
             <label>Mídia de fundo</label>
             <select
               value={settings.bg_media_type}
-              onChange={(e) => update("bg_media_type", e.target.value as LandingSettings["bg_media_type"])}
+              onChange={(e) => {
+                const nextType = e.target.value as LandingSettings["bg_media_type"];
+                setSettings((prev) => {
+                  if (!prev) return prev;
+                  const suggestOpacity = nextType === "color_video" && prev.bg_media_type !== "color_video";
+                  return {
+                    ...prev,
+                    bg_media_type: nextType,
+                    bg_media_opacity: suggestOpacity ? 20 : prev.bg_media_opacity,
+                  };
+                });
+              }}
             >
               <option value="none">Nenhuma (só a cor)</option>
               <option value="image">Imagem</option>
               <option value="video">Vídeo</option>
+              <option value="color_video">Cor + vídeo sobreposto (efeito translúcido)</option>
             </select>
           </div>
           {settings.bg_media_type !== "none" && (
@@ -168,8 +225,30 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
                   placeholder="https://..."
                 />
               </div>
+              {(settings.bg_media_type === "video" || settings.bg_media_type === "color_video") && (
+                <div className="field span3">
+                  <label>Ou envie um arquivo de vídeo (.mp4 ou .webm, até 100MB)</label>
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm"
+                    disabled={uploadingBgVideo}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleBgVideoUpload(file);
+                      e.target.value = "";
+                    }}
+                  />
+                  {uploadingBgVideo && (
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 6 }}>Enviando vídeo...</div>
+                  )}
+                </div>
+              )}
               <div className="field span3">
-                <label>Transparência da mídia de fundo ({settings.bg_media_opacity}% visível)</label>
+                <label>
+                  {settings.bg_media_type === "color_video"
+                    ? `Transparência da cor sobre o vídeo (${settings.bg_media_opacity}% visível — o vídeo fica sempre nítido por baixo)`
+                    : `Transparência da mídia de fundo (${settings.bg_media_opacity}% visível)`}
+                </label>
                 <input
                   type="range"
                   min={0}

@@ -46,7 +46,7 @@ export async function PATCH(request: Request) {
   const show_web_link_button = Boolean(body.show_web_link_button);
   const show_whatsapp_button = Boolean(body.show_whatsapp_button);
   const button_reveal_percent = Math.min(100, Math.max(0, Math.round(Number(body.button_reveal_percent) || 0)));
-  const bg_media_type = ["image", "video"].includes(body.bg_media_type) ? body.bg_media_type : "none";
+  const bg_media_type = ["image", "video", "color_video"].includes(body.bg_media_type) ? body.bg_media_type : "none";
   const bg_media_url = String(body.bg_media_url || "").trim().slice(0, 500);
   const bg_media_opacity = Math.min(100, Math.max(0, Math.round(Number(body.bg_media_opacity) ?? 100)));
 

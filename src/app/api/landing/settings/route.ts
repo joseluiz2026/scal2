@@ -16,6 +16,11 @@ const DEFAULT_SETTINGS = {
   bg_media_type: "none",
   bg_media_url: "",
   bg_media_opacity: 100,
+  hero_eyebrow: "Toque Aí · Seja um parceiro",
+  hero_headline: "Transforme sua loja em ponto de venda Toque Aí",
+  hero_sub:
+    "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender.",
+  video_orientation: "horizontal",
   updated_at: new Date(0).toISOString(),
 };
 
@@ -49,6 +54,12 @@ export async function PATCH(request: Request) {
   const bg_media_type = ["image", "video", "color_video"].includes(body.bg_media_type) ? body.bg_media_type : "none";
   const bg_media_url = String(body.bg_media_url || "").trim().slice(0, 500);
   const bg_media_opacity = Math.min(100, Math.max(0, Math.round(Number(body.bg_media_opacity) ?? 100)));
+  const hero_eyebrow = String(body.hero_eyebrow || "").trim().slice(0, 80);
+  const hero_headline = String(body.hero_headline || "").trim().slice(0, 160);
+  const hero_sub = String(body.hero_sub || "").trim().slice(0, 300);
+  const video_orientation = ["horizontal", "vertical"].includes(body.video_orientation)
+    ? body.video_orientation
+    : "horizontal";
 
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -66,6 +77,10 @@ export async function PATCH(request: Request) {
       bg_media_type,
       bg_media_url,
       bg_media_opacity,
+      hero_eyebrow,
+      hero_headline,
+      hero_sub,
+      video_orientation,
       updated_at: new Date().toISOString(),
     })
     .select()

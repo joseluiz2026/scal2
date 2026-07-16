@@ -459,6 +459,12 @@
     padding: 10px 12px; color:var(--text); font-family: var(--font-inter); font-size:13.5px;
   }
   .field input:focus{ outline:none; border-color: var(--copper); }
+  .field textarea{
+    width:100%; background: var(--bg); border:1px solid var(--border); border-radius:8px;
+    padding: 10px 12px; color:var(--text); font-family: var(--font-inter); font-size:13.5px;
+    resize: vertical; min-height: 60px;
+  }
+  .field textarea:focus{ outline:none; border-color: var(--copper); }
   .field select{
     width:100%; background: var(--bg); border:1px solid var(--border); border-radius:8px;
     padding: 10px 12px; color:var(--text); font-family: var(--font-inter); font-size:13.5px;

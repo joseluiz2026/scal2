@@ -32,8 +32,38 @@
   max-width: 1080px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  grid-template-rows: auto 1fr;
+  gap: 18px 40px;
   align-items: stretch;
+}
+
+/* Text groups with the video column (video is horizontal, so it has spare
+   height above it for a title/subtitle before the video starts). */
+.landing-shell--text-on-video {
+  grid-template-areas:
+    "text  form"
+    "video form";
+}
+.landing-shell--text-on-video .landing-hero-text { grid-area: text; }
+.landing-shell--text-on-video .landing-video-col { grid-area: video; }
+.landing-shell--text-on-video .landing-card { grid-area: form; }
+
+/* Text groups with the form column instead (video is vertical/tall and
+   fills the whole column height, so the title sits above the form). */
+.landing-shell--text-on-form {
+  grid-template-areas:
+    "video text"
+    "video form";
+}
+.landing-shell--text-on-form .landing-hero-text { grid-area: text; }
+.landing-shell--text-on-form .landing-video-col { grid-area: video; }
+.landing-shell--text-on-form .landing-card { grid-area: form; }
+
+.landing-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: end;
 }
 
 .landing-video-col {
@@ -236,8 +266,20 @@
 }
 
 @media (max-width: 860px) {
-  .landing-shell {
+  .landing-shell,
+  .landing-shell--text-on-video,
+  .landing-shell--text-on-form {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-template-areas: none;
+  }
+  .landing-shell--text-on-video .landing-hero-text,
+  .landing-shell--text-on-video .landing-video-col,
+  .landing-shell--text-on-video .landing-card,
+  .landing-shell--text-on-form .landing-hero-text,
+  .landing-shell--text-on-form .landing-video-col,
+  .landing-shell--text-on-form .landing-card {
+    grid-area: auto;
   }
   .landing-headline {
     font-size: 26px;

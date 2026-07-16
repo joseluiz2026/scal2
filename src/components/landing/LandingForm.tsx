@@ -18,6 +18,7 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
   const bgTo = shadeColor(bgFrom, -18);
   const isColorVideo = settings.bg_media_type === "color_video";
   const pageBackground = isColorVideo ? bgFrom : `radial-gradient(circle at 30% 20%, ${bgTo} 0%, ${bgFrom} 60%)`;
+  const textOnForm = settings.video_orientation === "vertical";
   const progress = useVideoProgress(iframeRef, embedUrl);
   const buttonsRevealed = progress >= (settings.button_reveal_percent || 0);
   const showLinkButton = buttonsRevealed && settings.show_web_link_button && !!settings.web_link_url;
@@ -84,14 +85,19 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
           />
         </>
       )}
-      <div className="landing-shell">
-        <div className="landing-video-col">
-          <div className="landing-eyebrow">Toque Aí · Seja um parceiro</div>
-          <h1 className="landing-headline">Transforme sua loja em ponto de venda Toque Aí</h1>
+      <div className={`landing-shell ${textOnForm ? "landing-shell--text-on-form" : "landing-shell--text-on-video"}`}>
+        <div className="landing-hero-text">
+          <div className="landing-eyebrow">{settings.hero_eyebrow || "Toque Aí · Seja um parceiro"}</div>
+          <h1 className="landing-headline">
+            {settings.hero_headline || "Transforme sua loja em ponto de venda Toque Aí"}
+          </h1>
           <p className="landing-sub">
-            Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto
-            para vender.
+            {settings.hero_sub ||
+              "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender."}
           </p>
+        </div>
+
+        <div className="landing-video-col">
           <div className="landing-video-wrap">
             {embedUrl ? (
               <iframe

@@ -45,6 +45,11 @@ const FALLBACK_SETTINGS: LandingSettings = {
   bg_media_type: "none",
   bg_media_url: "",
   bg_media_opacity: 100,
+  hero_eyebrow: "Toque Aí · Seja um parceiro",
+  hero_headline: "Transforme sua loja em ponto de venda Toque Aí",
+  hero_sub:
+    "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender.",
+  video_orientation: "horizontal",
   updated_at: new Date(0).toISOString(),
 };
 
@@ -147,6 +152,44 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
     <>
       <div className="form-card" style={{ marginBottom: 24 }}>
         <div className="field-grid">
+          <div className="field">
+            <label>Texto acima do título (eyebrow)</label>
+            <input
+              value={settings.hero_eyebrow || ""}
+              onChange={(e) => update("hero_eyebrow", e.target.value)}
+              placeholder="Toque Aí · Seja um parceiro"
+            />
+          </div>
+          <div className="field span2">
+            <label>Título de destaque</label>
+            <input
+              value={settings.hero_headline || ""}
+              onChange={(e) => update("hero_headline", e.target.value)}
+              placeholder="Transforme sua loja em ponto de venda Toque Aí"
+            />
+          </div>
+          <div className="field span2">
+            <label>Subtítulo</label>
+            <textarea
+              value={settings.hero_sub || ""}
+              onChange={(e) => update("hero_sub", e.target.value)}
+              placeholder="Assista ao vídeo e conheça o modelo de parceria..."
+              rows={2}
+            />
+          </div>
+          <div className="field">
+            <label>Orientação do vídeo principal</label>
+            <select
+              value={settings.video_orientation}
+              onChange={(e) => update("video_orientation", e.target.value as LandingSettings["video_orientation"])}
+            >
+              <option value="horizontal">Horizontal (paisagem)</option>
+              <option value="vertical">Vertical (retrato)</option>
+            </select>
+            <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 6 }}>
+              Define se o texto acima aparece junto do vídeo (horizontal) ou junto do formulário (vertical).
+            </div>
+          </div>
           <div className="field span2">
             <label>Cor de fundo</label>
             <input type="color" value={settings.bg_color} onChange={(e) => update("bg_color", e.target.value)} />

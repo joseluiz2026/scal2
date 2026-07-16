@@ -18,6 +18,11 @@ const DEFAULT_SETTINGS: LandingSettings = {
   bg_media_type: "none",
   bg_media_url: "",
   bg_media_opacity: 100,
+  hero_eyebrow: "Toque Aí · Seja um parceiro",
+  hero_headline: "Transforme sua loja em ponto de venda Toque Aí",
+  hero_sub:
+    "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender.",
+  video_orientation: "horizontal",
   updated_at: new Date(0).toISOString(),
 };
 

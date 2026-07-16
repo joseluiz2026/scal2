@@ -5,6 +5,14 @@ import { buildWhatsappLink, shadeColor, toEmbedUrl } from "@/lib/landing";
 import type { LandingSettings } from "@/lib/types";
 import { useVideoProgress } from "./useVideoProgress";
 
+// Keeps a width-constrained block anchored to the same side as the text alignment
+// (e.g. a narrower left-aligned headline stays flush left instead of drifting to center).
+function alignMargin(align: LandingSettings["hero_text_align"]) {
+  if (align === "center") return { marginLeft: "auto", marginRight: "auto" };
+  if (align === "right") return { marginLeft: "auto", marginRight: 0 };
+  return { marginLeft: 0, marginRight: "auto" };
+}
+
 export default function LandingForm({ settings }: { settings: LandingSettings }) {
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -89,13 +97,23 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
           <div className="landing-eyebrow">{settings.hero_eyebrow || "Toque Aí · Seja um parceiro"}</div>
           <h1
             className="landing-headline"
-            style={{ fontSize: settings.hero_headline_size || 34, color: settings.hero_headline_color || "#EEF2F7" }}
+            style={{
+              fontSize: settings.hero_headline_size || 34,
+              color: settings.hero_headline_color || "#EEF2F7",
+              maxWidth: `${settings.hero_headline_width_percent || 100}%`,
+              ...alignMargin(settings.hero_text_align),
+            }}
           >
             {settings.hero_headline || "Transforme sua loja em ponto de venda Toque Aí"}
           </h1>
           <p
             className="landing-sub"
-            style={{ fontSize: settings.hero_sub_size || 15, color: settings.hero_sub_color || "#C9D3DE" }}
+            style={{
+              fontSize: settings.hero_sub_size || 15,
+              color: settings.hero_sub_color || "#C9D3DE",
+              maxWidth: `${settings.hero_sub_width_percent || 100}%`,
+              ...alignMargin(settings.hero_text_align),
+            }}
           >
             {settings.hero_sub ||
               "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender."}
@@ -145,33 +163,35 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
           </div>
         </div>
 
-        <div className="landing-card" style={{ maxWidth: `${settings.form_width_percent || 50}%` }}>
-          <h2>Quero ser parceiro</h2>
-          <p className="landing-card-sub">Preencha seus dados — a conversa continua no WhatsApp.</p>
-          <form onSubmit={handleSubmit}>
-            <div className="landing-field">
-              <label>Nome completo</label>
-              <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" required />
-            </div>
-            <div className="landing-field">
-              <label>WhatsApp</label>
-              <input
-                value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="(27) 90000-0000"
-                required
-              />
-            </div>
-            <div className="landing-field">
-              <label>Cidade</label>
-              <input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Vitória - ES" />
-            </div>
-            <button className="landing-submit" type="submit" disabled={sending}>
-              {sending ? "Enviando..." : "Quero assinar · falar no WhatsApp"}
-            </button>
-            {error && <div className="landing-feedback error">{error}</div>}
-          </form>
-        </div>
+        {settings.form_enabled !== false && (
+          <div className="landing-card" style={{ maxWidth: `${settings.form_width_percent || 50}%` }}>
+            <h2>Quero ser parceiro</h2>
+            <p className="landing-card-sub">Preencha seus dados — a conversa continua no WhatsApp.</p>
+            <form onSubmit={handleSubmit}>
+              <div className="landing-field">
+                <label>Nome completo</label>
+                <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" required />
+              </div>
+              <div className="landing-field">
+                <label>WhatsApp</label>
+                <input
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="(27) 90000-0000"
+                  required
+                />
+              </div>
+              <div className="landing-field">
+                <label>Cidade</label>
+                <input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Vitória - ES" />
+              </div>
+              <button className="landing-submit" type="submit" disabled={sending}>
+                {sending ? "Enviando..." : "Estou muito interessado - quero saber mais"}
+              </button>
+              {error && <div className="landing-feedback error">{error}</div>}
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

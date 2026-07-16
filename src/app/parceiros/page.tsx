@@ -27,8 +27,11 @@ const DEFAULT_SETTINGS: LandingSettings = {
   hero_sub_size: 15,
   hero_sub_color: "#C9D3DE",
   hero_text_align: "left",
+  hero_headline_width_percent: 100,
+  hero_sub_width_percent: 100,
   video_width_percent: 70,
   form_width_percent: 50,
+  form_enabled: true,
   updated_at: new Date(0).toISOString(),
 };
 

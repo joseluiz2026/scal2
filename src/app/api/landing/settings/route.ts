@@ -25,8 +25,11 @@ const DEFAULT_SETTINGS = {
   hero_sub_size: 15,
   hero_sub_color: "#C9D3DE",
   hero_text_align: "left",
+  hero_headline_width_percent: 100,
+  hero_sub_width_percent: 100,
   video_width_percent: 70,
   form_width_percent: 50,
+  form_enabled: true,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -68,8 +71,14 @@ export async function PATCH(request: Request) {
   const hero_sub_size = Math.min(32, Math.max(11, Math.round(Number(body.hero_sub_size) || 15)));
   const hero_sub_color = /^#[0-9a-fA-F]{6}$/.test(body.hero_sub_color) ? body.hero_sub_color : "#C9D3DE";
   const hero_text_align = ["left", "center", "right"].includes(body.hero_text_align) ? body.hero_text_align : "left";
+  const hero_headline_width_percent = Math.min(
+    100,
+    Math.max(30, Math.round(Number(body.hero_headline_width_percent) || 100)),
+  );
+  const hero_sub_width_percent = Math.min(100, Math.max(30, Math.round(Number(body.hero_sub_width_percent) || 100)));
   const video_width_percent = Math.min(100, Math.max(30, Math.round(Number(body.video_width_percent) || 70)));
   const form_width_percent = Math.min(100, Math.max(30, Math.round(Number(body.form_width_percent) || 50)));
+  const form_enabled = Boolean(body.form_enabled);
 
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -95,8 +104,11 @@ export async function PATCH(request: Request) {
       hero_sub_size,
       hero_sub_color,
       hero_text_align,
+      hero_headline_width_percent,
+      hero_sub_width_percent,
       video_width_percent,
       form_width_percent,
+      form_enabled,
       updated_at: new Date().toISOString(),
     })
     .select()

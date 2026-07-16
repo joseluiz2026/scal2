@@ -54,8 +54,11 @@ const FALLBACK_SETTINGS: LandingSettings = {
   hero_sub_size: 15,
   hero_sub_color: "#C9D3DE",
   hero_text_align: "left",
+  hero_headline_width_percent: 100,
+  hero_sub_width_percent: 100,
   video_width_percent: 70,
   form_width_percent: 50,
+  form_enabled: true,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -233,6 +236,28 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
             />
           </div>
           <div className="field">
+            <label>Largura do título ({settings.hero_headline_width_percent}%)</label>
+            <input
+              type="range"
+              min={30}
+              max={100}
+              step={5}
+              value={settings.hero_headline_width_percent}
+              onChange={(e) => update("hero_headline_width_percent", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>Largura do subtítulo ({settings.hero_sub_width_percent}%)</label>
+            <input
+              type="range"
+              min={30}
+              max={100}
+              step={5}
+              value={settings.hero_sub_width_percent}
+              onChange={(e) => update("hero_sub_width_percent", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
             <label>Largura do vídeo ({settings.video_width_percent}%)</label>
             <input
               type="range"
@@ -253,6 +278,16 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
               value={settings.form_width_percent}
               onChange={(e) => update("form_width_percent", Number(e.target.value))}
             />
+          </div>
+          <div className="checkbox-group">
+            <label className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={settings.form_enabled}
+                onChange={(e) => update("form_enabled", e.target.checked)}
+              />
+              <span>Formulário &quot;Quero ser parceiro&quot; habilitado</span>
+            </label>
           </div>
           <div className="field span2">
             <label>Cor de fundo</label>

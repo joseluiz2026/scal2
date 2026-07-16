@@ -100,8 +100,11 @@ export type LandingSettings = {
   hero_sub_size: number;
   hero_sub_color: string;
   hero_text_align: TextAlign;
+  hero_headline_width_percent: number;
+  hero_sub_width_percent: number;
   video_width_percent: number;
   form_width_percent: number;
+  form_enabled: boolean;
   updated_at: string;
 };
 

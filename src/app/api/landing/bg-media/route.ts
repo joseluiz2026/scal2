@@ -25,8 +25,8 @@ export async function POST(request: Request) {
   const path = `bg-media/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
 
   try {
-    const { path: storedPath, token } = await createPublicUploadUrl(path);
-    return NextResponse.json({ path: storedPath, token, publicUrl: publicFileUrl(storedPath) });
+    const { path: storedPath, token, signedUrl } = await createPublicUploadUrl(path);
+    return NextResponse.json({ path: storedPath, token, signedUrl, publicUrl: publicFileUrl(storedPath) });
   } catch {
     return NextResponse.json({ error: "Não foi possível preparar o envio do vídeo." }, { status: 500 });
   }

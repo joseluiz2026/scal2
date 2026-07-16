@@ -2,10 +2,35 @@
 
 import { useEffect, useState } from "react";
 import type { LandingLead, LandingSettings } from "@/lib/types";
-import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 const MAX_BG_VIDEO_BYTES = 50 * 1024 * 1024; // matches the storage bucket's fileSizeLimit
 const ALLOWED_BG_VIDEO_TYPES = ["video/mp4", "video/webm"];
+
+// Uploads straight to the Supabase-issued signed URL via XHR (not fetch) because only
+// XHR exposes upload progress events — with fetch the UI has no way to tell a slow
+// transfer apart from a stuck one.
+function uploadWithProgress(signedUrl: string, file: File, onProgress: (percent: number) => void) {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", signedUrl);
+    xhr.setRequestHeader("apikey", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "");
+    xhr.setRequestHeader("authorization", `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""}`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`Upload falhou (status ${xhr.status}): ${xhr.responseText.slice(0, 200)}`));
+    };
+    xhr.onerror = () => reject(new Error("Falha de rede durante o envio."));
+    xhr.onabort = () => reject(new Error("Envio cancelado."));
+
+    const body = new FormData();
+    body.append("cacheControl", "3600");
+    body.append("", file);
+    xhr.send(body);
+  });
+}
 
 const FALLBACK_SETTINGS: LandingSettings = {
   id: 1,
@@ -29,6 +54,7 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingBgVideo, setUploadingBgVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -86,6 +112,7 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
     }
 
     setUploadingBgVideo(true);
+    setUploadProgress(0);
     try {
       const prepRes = await fetch("/api/landing/bg-media", {
         method: "POST",
@@ -98,20 +125,13 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
         return;
       }
 
-      const supabase = createBrowserClient();
-      const { error: uploadError } = await supabase.storage
-        .from("scal-public")
-        .uploadToSignedUrl(prepData.path, prepData.token, file, { contentType: file.type });
-      if (uploadError) {
-        onError("Não foi possível enviar o vídeo.");
-        return;
-      }
-
+      await uploadWithProgress(prepData.signedUrl, file, setUploadProgress);
       update("bg_media_url", prepData.publicUrl);
-    } catch {
-      onError("Não foi possível conectar. Tente novamente.");
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Não foi possível enviar o vídeo.");
     } finally {
       setUploadingBgVideo(false);
+      setUploadProgress(0);
     }
   }
 
@@ -242,7 +262,28 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
                     }}
                   />
                   {uploadingBgVideo && (
-                    <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 6 }}>Enviando vídeo...</div>
+                    <div style={{ marginTop: 8 }}>
+                      <div
+                        style={{
+                          height: 6,
+                          borderRadius: 3,
+                          background: "rgba(127, 127, 127, 0.25)",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${uploadProgress}%`,
+                            background: "var(--copper)",
+                            transition: "width 0.2s ease",
+                          }}
+                        />
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                        Enviando vídeo... {uploadProgress}%
+                      </div>
+                    </div>
                   )}
                 </div>
               )}

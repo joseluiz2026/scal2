@@ -159,200 +159,14 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
 
   return (
     <>
+      <div className="section-head">
+        <h2>Cor, imagem e vídeo de fundo</h2>
+      </div>
       <div className="form-card" style={{ marginBottom: 24 }}>
         <div className="field-grid">
-          <div className="field">
-            <label>Texto acima do título (eyebrow)</label>
-            <input
-              value={settings.hero_eyebrow || ""}
-              onChange={(e) => update("hero_eyebrow", e.target.value)}
-              placeholder="Toque Aí · Seja um parceiro"
-            />
-          </div>
-          <div className="field span2">
-            <label>Título de destaque</label>
-            <input
-              value={settings.hero_headline || ""}
-              onChange={(e) => update("hero_headline", e.target.value)}
-              placeholder="Transforme sua loja em ponto de venda Toque Aí"
-            />
-          </div>
-          <div className="field span2">
-            <label>Subtítulo</label>
-            <textarea
-              value={settings.hero_sub || ""}
-              onChange={(e) => update("hero_sub", e.target.value)}
-              placeholder="Assista ao vídeo e conheça o modelo de parceria..."
-              rows={2}
-            />
-          </div>
-          <div className="field">
-            <label>Alinhamento do texto</label>
-            <select
-              value={settings.hero_text_align}
-              onChange={(e) => update("hero_text_align", e.target.value as LandingSettings["hero_text_align"])}
-            >
-              <option value="left">Esquerda</option>
-              <option value="center">Centro</option>
-              <option value="right">Direita</option>
-            </select>
-          </div>
-          <div className="field">
-            <label>Tamanho do título ({settings.hero_headline_size}px)</label>
-            <input
-              type="range"
-              min={16}
-              max={72}
-              step={1}
-              value={settings.hero_headline_size}
-              onChange={(e) => update("hero_headline_size", Number(e.target.value))}
-            />
-          </div>
-          <div className="field">
-            <label>Cor do título</label>
-            <input
-              type="color"
-              value={settings.hero_headline_color}
-              onChange={(e) => update("hero_headline_color", e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label>Tamanho do subtítulo ({settings.hero_sub_size}px)</label>
-            <input
-              type="range"
-              min={11}
-              max={32}
-              step={1}
-              value={settings.hero_sub_size}
-              onChange={(e) => update("hero_sub_size", Number(e.target.value))}
-            />
-          </div>
-          <div className="field">
-            <label>Cor do subtítulo</label>
-            <input
-              type="color"
-              value={settings.hero_sub_color}
-              onChange={(e) => update("hero_sub_color", e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label>Largura do título ({settings.hero_headline_width_percent}%)</label>
-            <input
-              type="range"
-              min={30}
-              max={100}
-              step={5}
-              value={settings.hero_headline_width_percent}
-              onChange={(e) => update("hero_headline_width_percent", Number(e.target.value))}
-            />
-          </div>
-          <div className="field">
-            <label>Largura do subtítulo ({settings.hero_sub_width_percent}%)</label>
-            <input
-              type="range"
-              min={30}
-              max={100}
-              step={5}
-              value={settings.hero_sub_width_percent}
-              onChange={(e) => update("hero_sub_width_percent", Number(e.target.value))}
-            />
-          </div>
-          <div className="field">
-            <label>Largura do vídeo ({settings.video_width_percent}%)</label>
-            <input
-              type="range"
-              min={30}
-              max={100}
-              step={5}
-              value={settings.video_width_percent}
-              onChange={(e) => update("video_width_percent", Number(e.target.value))}
-            />
-          </div>
-          <div className="field">
-            <label>Largura do formulário ({settings.form_width_percent}%)</label>
-            <input
-              type="range"
-              min={30}
-              max={100}
-              step={5}
-              value={settings.form_width_percent}
-              onChange={(e) => update("form_width_percent", Number(e.target.value))}
-            />
-          </div>
-          <div className="checkbox-group">
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={settings.form_enabled}
-                onChange={(e) => update("form_enabled", e.target.checked)}
-              />
-              <span>Formulário &quot;Quero ser parceiro&quot; habilitado</span>
-            </label>
-          </div>
           <div className="field span2">
             <label>Cor de fundo</label>
             <input type="color" value={settings.bg_color} onChange={(e) => update("bg_color", e.target.value)} />
-          </div>
-          <div className="field">
-            <label>WhatsApp de destino</label>
-            <input
-              value={settings.whatsapp_number || ""}
-              onChange={(e) => update("whatsapp_number", e.target.value)}
-              placeholder="5527900000000"
-            />
-          </div>
-          <div className="field span2">
-            <label>Vídeo (link do YouTube ou Vimeo)</label>
-            <input
-              value={settings.video_url || ""}
-              onChange={(e) => update("video_url", e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-          </div>
-          <div className="field">
-            <label>Texto do botão de link</label>
-            <input
-              value={settings.web_link_label || ""}
-              onChange={(e) => update("web_link_label", e.target.value)}
-              placeholder="Saiba mais"
-            />
-          </div>
-          <div className="field span3">
-            <label>Link do botão (site externo)</label>
-            <input
-              value={settings.web_link_url || ""}
-              onChange={(e) => update("web_link_url", e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-          <div className="checkbox-group">
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={settings.show_web_link_button}
-                onChange={(e) => update("show_web_link_button", e.target.checked)}
-              />
-              <span>Mostrar botão de link</span>
-            </label>
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={settings.show_whatsapp_button}
-                onChange={(e) => update("show_whatsapp_button", e.target.checked)}
-              />
-              <span>Mostrar botão de WhatsApp</span>
-            </label>
-          </div>
-          <div className="field span3">
-            <label>Exibir botão(ões) após {settings.button_reveal_percent}% do vídeo</label>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={5}
-              value={settings.button_reveal_percent}
-              onChange={(e) => update("button_reveal_percent", Number(e.target.value))}
-            />
           </div>
           <div className="field">
             <label>Mídia de fundo</label>
@@ -446,6 +260,219 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
               </div>
             </>
           )}
+        </div>
+      </div>
+
+      <div className="section-head">
+        <h2>Títulos</h2>
+      </div>
+      <div className="form-card" style={{ marginBottom: 24 }}>
+        <div className="field-grid">
+          <div className="field">
+            <label>Texto acima do título (eyebrow)</label>
+            <input
+              value={settings.hero_eyebrow || ""}
+              onChange={(e) => update("hero_eyebrow", e.target.value)}
+              placeholder="Toque Aí · Seja um parceiro"
+            />
+          </div>
+          <div className="field span2">
+            <label>Título de destaque</label>
+            <input
+              value={settings.hero_headline || ""}
+              onChange={(e) => update("hero_headline", e.target.value)}
+              placeholder="Transforme sua loja em ponto de venda Toque Aí"
+            />
+          </div>
+          <div className="field span2">
+            <label>Subtítulo</label>
+            <textarea
+              value={settings.hero_sub || ""}
+              onChange={(e) => update("hero_sub", e.target.value)}
+              placeholder="Assista ao vídeo e conheça o modelo de parceria..."
+              rows={2}
+            />
+          </div>
+          <div className="field">
+            <label>Alinhamento do texto</label>
+            <select
+              value={settings.hero_text_align}
+              onChange={(e) => update("hero_text_align", e.target.value as LandingSettings["hero_text_align"])}
+            >
+              <option value="left">Esquerda</option>
+              <option value="center">Centro</option>
+              <option value="right">Direita</option>
+            </select>
+          </div>
+          <div className="field">
+            <label>Tamanho do título ({settings.hero_headline_size}px)</label>
+            <input
+              type="range"
+              min={16}
+              max={72}
+              step={1}
+              value={settings.hero_headline_size}
+              onChange={(e) => update("hero_headline_size", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>Cor do título</label>
+            <input
+              type="color"
+              value={settings.hero_headline_color}
+              onChange={(e) => update("hero_headline_color", e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label>Largura do título ({settings.hero_headline_width_percent}%)</label>
+            <input
+              type="range"
+              min={30}
+              max={100}
+              step={5}
+              value={settings.hero_headline_width_percent}
+              onChange={(e) => update("hero_headline_width_percent", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>Tamanho do subtítulo ({settings.hero_sub_size}px)</label>
+            <input
+              type="range"
+              min={11}
+              max={32}
+              step={1}
+              value={settings.hero_sub_size}
+              onChange={(e) => update("hero_sub_size", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>Cor do subtítulo</label>
+            <input
+              type="color"
+              value={settings.hero_sub_color}
+              onChange={(e) => update("hero_sub_color", e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label>Largura do subtítulo ({settings.hero_sub_width_percent}%)</label>
+            <input
+              type="range"
+              min={30}
+              max={100}
+              step={5}
+              value={settings.hero_sub_width_percent}
+              onChange={(e) => update("hero_sub_width_percent", Number(e.target.value))}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="section-head">
+        <h2>Vídeo principal e botões</h2>
+      </div>
+      <div className="form-card" style={{ marginBottom: 24 }}>
+        <div className="field-grid">
+          <div className="field span2">
+            <label>Vídeo (link do YouTube ou Vimeo)</label>
+            <input
+              value={settings.video_url || ""}
+              onChange={(e) => update("video_url", e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+          </div>
+          <div className="field">
+            <label>Largura do vídeo ({settings.video_width_percent}%)</label>
+            <input
+              type="range"
+              min={30}
+              max={100}
+              step={5}
+              value={settings.video_width_percent}
+              onChange={(e) => update("video_width_percent", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>WhatsApp de destino</label>
+            <input
+              value={settings.whatsapp_number || ""}
+              onChange={(e) => update("whatsapp_number", e.target.value)}
+              placeholder="5527900000000"
+            />
+          </div>
+          <div className="field">
+            <label>Texto do botão de link</label>
+            <input
+              value={settings.web_link_label || ""}
+              onChange={(e) => update("web_link_label", e.target.value)}
+              placeholder="Saiba mais"
+            />
+          </div>
+          <div className="field span3">
+            <label>Link do botão (site externo)</label>
+            <input
+              value={settings.web_link_url || ""}
+              onChange={(e) => update("web_link_url", e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
+          <div className="checkbox-group">
+            <label className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={settings.show_web_link_button}
+                onChange={(e) => update("show_web_link_button", e.target.checked)}
+              />
+              <span>Mostrar botão de link</span>
+            </label>
+            <label className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={settings.show_whatsapp_button}
+                onChange={(e) => update("show_whatsapp_button", e.target.checked)}
+              />
+              <span>Mostrar botão de WhatsApp</span>
+            </label>
+          </div>
+          <div className="field span3">
+            <label>Exibir botão(ões) após {settings.button_reveal_percent}% do vídeo</label>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={settings.button_reveal_percent}
+              onChange={(e) => update("button_reveal_percent", Number(e.target.value))}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="section-head">
+        <h2>Formulário</h2>
+      </div>
+      <div className="form-card" style={{ marginBottom: 24 }}>
+        <div className="field-grid">
+          <div className="field">
+            <label>Largura do formulário ({settings.form_width_percent}%)</label>
+            <input
+              type="range"
+              min={30}
+              max={100}
+              step={5}
+              value={settings.form_width_percent}
+              onChange={(e) => update("form_width_percent", Number(e.target.value))}
+            />
+          </div>
+          <div className="checkbox-group">
+            <label className="checkbox-item">
+              <input
+                type="checkbox"
+                checked={settings.form_enabled}
+                onChange={(e) => update("form_enabled", e.target.checked)}
+              />
+              <span>Formulário &quot;Quero ser parceiro&quot; habilitado</span>
+            </label>
+          </div>
         </div>
         <div className="submit-row">
           <a className="btn" href="/parceiros" target="_blank" rel="noopener noreferrer">

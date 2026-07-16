@@ -49,7 +49,13 @@ const FALLBACK_SETTINGS: LandingSettings = {
   hero_headline: "Transforme sua loja em ponto de venda Toque Aí",
   hero_sub:
     "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender.",
-  video_orientation: "horizontal",
+  hero_headline_size: 34,
+  hero_headline_color: "#EEF2F7",
+  hero_sub_size: 15,
+  hero_sub_color: "#C9D3DE",
+  hero_text_align: "left",
+  video_width_percent: 70,
+  form_width_percent: 50,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -178,17 +184,75 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
             />
           </div>
           <div className="field">
-            <label>Orientação do vídeo principal</label>
+            <label>Alinhamento do texto</label>
             <select
-              value={settings.video_orientation}
-              onChange={(e) => update("video_orientation", e.target.value as LandingSettings["video_orientation"])}
+              value={settings.hero_text_align}
+              onChange={(e) => update("hero_text_align", e.target.value as LandingSettings["hero_text_align"])}
             >
-              <option value="horizontal">Horizontal (paisagem)</option>
-              <option value="vertical">Vertical (retrato)</option>
+              <option value="left">Esquerda</option>
+              <option value="center">Centro</option>
+              <option value="right">Direita</option>
             </select>
-            <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 6 }}>
-              Define se o texto acima aparece junto do vídeo (horizontal) ou junto do formulário (vertical).
-            </div>
+          </div>
+          <div className="field">
+            <label>Tamanho do título ({settings.hero_headline_size}px)</label>
+            <input
+              type="range"
+              min={16}
+              max={72}
+              step={1}
+              value={settings.hero_headline_size}
+              onChange={(e) => update("hero_headline_size", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>Cor do título</label>
+            <input
+              type="color"
+              value={settings.hero_headline_color}
+              onChange={(e) => update("hero_headline_color", e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label>Tamanho do subtítulo ({settings.hero_sub_size}px)</label>
+            <input
+              type="range"
+              min={11}
+              max={32}
+              step={1}
+              value={settings.hero_sub_size}
+              onChange={(e) => update("hero_sub_size", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>Cor do subtítulo</label>
+            <input
+              type="color"
+              value={settings.hero_sub_color}
+              onChange={(e) => update("hero_sub_color", e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label>Largura do vídeo ({settings.video_width_percent}%)</label>
+            <input
+              type="range"
+              min={30}
+              max={100}
+              step={5}
+              value={settings.video_width_percent}
+              onChange={(e) => update("video_width_percent", Number(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label>Largura do formulário ({settings.form_width_percent}%)</label>
+            <input
+              type="range"
+              min={30}
+              max={100}
+              step={5}
+              value={settings.form_width_percent}
+              onChange={(e) => update("form_width_percent", Number(e.target.value))}
+            />
           </div>
           <div className="field span2">
             <label>Cor de fundo</label>

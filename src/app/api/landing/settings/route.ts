@@ -20,7 +20,13 @@ const DEFAULT_SETTINGS = {
   hero_headline: "Transforme sua loja em ponto de venda Toque Aí",
   hero_sub:
     "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender.",
-  video_orientation: "horizontal",
+  hero_headline_size: 34,
+  hero_headline_color: "#EEF2F7",
+  hero_sub_size: 15,
+  hero_sub_color: "#C9D3DE",
+  hero_text_align: "left",
+  video_width_percent: 70,
+  form_width_percent: 50,
   updated_at: new Date(0).toISOString(),
 };
 
@@ -57,9 +63,13 @@ export async function PATCH(request: Request) {
   const hero_eyebrow = String(body.hero_eyebrow || "").trim().slice(0, 80);
   const hero_headline = String(body.hero_headline || "").trim().slice(0, 160);
   const hero_sub = String(body.hero_sub || "").trim().slice(0, 300);
-  const video_orientation = ["horizontal", "vertical"].includes(body.video_orientation)
-    ? body.video_orientation
-    : "horizontal";
+  const hero_headline_size = Math.min(72, Math.max(16, Math.round(Number(body.hero_headline_size) || 34)));
+  const hero_headline_color = /^#[0-9a-fA-F]{6}$/.test(body.hero_headline_color) ? body.hero_headline_color : "#EEF2F7";
+  const hero_sub_size = Math.min(32, Math.max(11, Math.round(Number(body.hero_sub_size) || 15)));
+  const hero_sub_color = /^#[0-9a-fA-F]{6}$/.test(body.hero_sub_color) ? body.hero_sub_color : "#C9D3DE";
+  const hero_text_align = ["left", "center", "right"].includes(body.hero_text_align) ? body.hero_text_align : "left";
+  const video_width_percent = Math.min(100, Math.max(30, Math.round(Number(body.video_width_percent) || 70)));
+  const form_width_percent = Math.min(100, Math.max(30, Math.round(Number(body.form_width_percent) || 50)));
 
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -80,7 +90,13 @@ export async function PATCH(request: Request) {
       hero_eyebrow,
       hero_headline,
       hero_sub,
-      video_orientation,
+      hero_headline_size,
+      hero_headline_color,
+      hero_sub_size,
+      hero_sub_color,
+      hero_text_align,
+      video_width_percent,
+      form_width_percent,
       updated_at: new Date().toISOString(),
     })
     .select()

@@ -22,7 +22,13 @@ const DEFAULT_SETTINGS: LandingSettings = {
   hero_headline: "Transforme sua loja em ponto de venda Toque Aí",
   hero_sub:
     "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender.",
-  video_orientation: "horizontal",
+  hero_headline_size: 34,
+  hero_headline_color: "#EEF2F7",
+  hero_sub_size: 15,
+  hero_sub_color: "#C9D3DE",
+  hero_text_align: "left",
+  video_width_percent: 70,
+  form_width_percent: 50,
   updated_at: new Date(0).toISOString(),
 };
 

@@ -18,7 +18,6 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
   const bgTo = shadeColor(bgFrom, -18);
   const isColorVideo = settings.bg_media_type === "color_video";
   const pageBackground = isColorVideo ? bgFrom : `radial-gradient(circle at 30% 20%, ${bgTo} 0%, ${bgFrom} 60%)`;
-  const textOnForm = settings.video_orientation === "vertical";
   const progress = useVideoProgress(iframeRef, embedUrl);
   const buttonsRevealed = progress >= (settings.button_reveal_percent || 0);
   const showLinkButton = buttonsRevealed && settings.show_web_link_button && !!settings.web_link_url;
@@ -85,19 +84,25 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
           />
         </>
       )}
-      <div className={`landing-shell ${textOnForm ? "landing-shell--text-on-form" : "landing-shell--text-on-video"}`}>
-        <div className="landing-hero-text">
+      <div className="landing-shell">
+        <div className="landing-hero-text" style={{ textAlign: settings.hero_text_align || "left" }}>
           <div className="landing-eyebrow">{settings.hero_eyebrow || "Toque Aí · Seja um parceiro"}</div>
-          <h1 className="landing-headline">
+          <h1
+            className="landing-headline"
+            style={{ fontSize: settings.hero_headline_size || 34, color: settings.hero_headline_color || "#EEF2F7" }}
+          >
             {settings.hero_headline || "Transforme sua loja em ponto de venda Toque Aí"}
           </h1>
-          <p className="landing-sub">
+          <p
+            className="landing-sub"
+            style={{ fontSize: settings.hero_sub_size || 15, color: settings.hero_sub_color || "#C9D3DE" }}
+          >
             {settings.hero_sub ||
               "Assista ao vídeo e conheça o modelo de parceria — comissão recorrente, suporte completo e produto pronto para vender."}
           </p>
         </div>
 
-        <div className="landing-video-col">
+        <div className="landing-video-col" style={{ maxWidth: `${settings.video_width_percent || 70}%` }}>
           <div className="landing-video-wrap">
             {embedUrl ? (
               <iframe
@@ -140,7 +145,7 @@ export default function LandingForm({ settings }: { settings: LandingSettings })
           </div>
         </div>
 
-        <div className="landing-card">
+        <div className="landing-card" style={{ maxWidth: `${settings.form_width_percent || 50}%` }}>
           <h2>Quero ser parceiro</h2>
           <p className="landing-card-sub">Preencha seus dados — a conversa continua no WhatsApp.</p>
           <form onSubmit={handleSubmit}>

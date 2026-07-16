@@ -77,7 +77,7 @@ export type Message = {
 };
 
 export type BgMediaType = "none" | "image" | "video" | "color_video";
-export type VideoOrientation = "horizontal" | "vertical";
+export type TextAlign = "left" | "center" | "right";
 
 export type LandingSettings = {
   id: number;
@@ -95,7 +95,13 @@ export type LandingSettings = {
   hero_eyebrow: string | null;
   hero_headline: string | null;
   hero_sub: string | null;
-  video_orientation: VideoOrientation;
+  hero_headline_size: number;
+  hero_headline_color: string;
+  hero_sub_size: number;
+  hero_sub_color: string;
+  hero_text_align: TextAlign;
+  video_width_percent: number;
+  form_width_percent: number;
   updated_at: string;
 };
 

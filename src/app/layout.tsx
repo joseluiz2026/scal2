@@ -20,7 +20,6 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Scal · Gestão de Comissões",
   description: "Plataforma de gestão de comissões para revendedores",
-  manifest: "/manifest.json",
   icons: {
     icon: "/icon-192x192.png",
     apple: "/icon-192x192.png",
@@ -38,20 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
-      <body>
-        {children}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function () {
-                  navigator.serviceWorker.register('/sw.js');
-                });
-              }
-            `,
-          }}
-        />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

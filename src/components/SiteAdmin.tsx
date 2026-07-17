@@ -4,10 +4,41 @@ import { useEffect, useState } from "react";
 import type { SiteSettings } from "@/lib/types";
 import { DEFAULT_SITE_SETTINGS } from "@/lib/siteSettings";
 
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+// Uploads straight to the Supabase-issued signed URL via XHR (not fetch) because only
+// XHR exposes upload progress events — with fetch the UI has no way to tell a slow
+// transfer apart from a stuck one.
+function uploadWithProgress(signedUrl: string, file: File, onProgress: (percent: number) => void) {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", signedUrl);
+    xhr.setRequestHeader("apikey", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "");
+    xhr.setRequestHeader("authorization", `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""}`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`Upload falhou (status ${xhr.status}): ${xhr.responseText.slice(0, 200)}`));
+    };
+    xhr.onerror = () => reject(new Error("Falha de rede durante o envio."));
+    xhr.onabort = () => reject(new Error("Envio cancelado."));
+
+    const body = new FormData();
+    body.append("cacheControl", "3600");
+    body.append("", file);
+    xhr.send(body);
+  });
+}
+
 export default function SiteAdmin({ onError }: { onError: (message: string) => void }) {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingHeroImage, setUploadingHeroImage] = useState(false);
+  const [heroUploadProgress, setHeroUploadProgress] = useState(0);
 
   useEffect(() => {
     fetch("/api/site/settings")
@@ -46,6 +77,40 @@ export default function SiteAdmin({ onError }: { onError: (message: string) => v
       onError("Não foi possível conectar. Tente novamente.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleHeroImageUpload(file: File) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      onError("Envie uma imagem .jpg, .png ou .webp.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      onError("A imagem excede o limite de 8MB.");
+      return;
+    }
+
+    setUploadingHeroImage(true);
+    setHeroUploadProgress(0);
+    try {
+      const prepRes = await fetch("/api/site/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentType: file.type }),
+      });
+      const prepData = await prepRes.json();
+      if (!prepRes.ok) {
+        onError(prepData.error || "Não foi possível preparar o envio da imagem.");
+        return;
+      }
+
+      await uploadWithProgress(prepData.signedUrl, file, setHeroUploadProgress);
+      update("hero_image_url", prepData.publicUrl);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Não foi possível enviar a imagem.");
+    } finally {
+      setUploadingHeroImage(false);
+      setHeroUploadProgress(0);
     }
   }
 
@@ -155,6 +220,34 @@ export default function SiteAdmin({ onError }: { onError: (message: string) => v
               onChange={(e) => update("hero_image_url", e.target.value)}
               placeholder="https://..."
             />
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              disabled={uploadingHeroImage}
+              style={{ marginTop: 8 }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleHeroImageUpload(file);
+                e.target.value = "";
+              }}
+            />
+            {uploadingHeroImage && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ height: 6, borderRadius: 3, background: "rgba(127, 127, 127, 0.25)", overflow: "hidden" }}>
+                  <div
+                    style={{
+                      height: "100%",
+                      width: `${heroUploadProgress}%`,
+                      background: "var(--copper)",
+                      transition: "width 0.2s ease",
+                    }}
+                  />
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                  Enviando imagem... {heroUploadProgress}%
+                </div>
+              </div>
+            )}
           </div>
           <div className="field">
             <label>Galeria — foto 1</label>

@@ -3,6 +3,8 @@ import { createAdminClient } from "./supabase/admin";
 const BUCKET = "scal-files";
 const PUBLIC_BUCKET = "scal-public";
 
+const PUBLIC_BUCKET_MIME_TYPES = ["video/mp4", "video/webm", "image/jpeg", "image/png", "image/webp"];
+
 let publicBucketReady: Promise<void> | null = null;
 
 async function ensurePublicBucket() {
@@ -10,7 +12,17 @@ async function ensurePublicBucket() {
     publicBucketReady = (async () => {
       const admin = createAdminClient();
       const { data: existing } = await admin.storage.getBucket(PUBLIC_BUCKET);
-      if (existing) return;
+
+      if (existing) {
+        // Bucket was created before image uploads existed (video-only allowedMimeTypes) —
+        // widen it in place so it accepts both, instead of provisioning a second bucket.
+        await admin.storage.updateBucket(PUBLIC_BUCKET, {
+          public: true,
+          fileSizeLimit: "50MB",
+          allowedMimeTypes: PUBLIC_BUCKET_MIME_TYPES,
+        });
+        return;
+      }
 
       // Kept under the project's global storage file-size cap — a bucket-level limit
       // above that cap makes createBucket fail every time with a 413, not an
@@ -18,7 +30,7 @@ async function ensurePublicBucket() {
       const { error } = await admin.storage.createBucket(PUBLIC_BUCKET, {
         public: true,
         fileSizeLimit: "50MB",
-        allowedMimeTypes: ["video/mp4", "video/webm"],
+        allowedMimeTypes: PUBLIC_BUCKET_MIME_TYPES,
       });
       if (error && !/already exists/i.test(error.message)) throw error;
     })();

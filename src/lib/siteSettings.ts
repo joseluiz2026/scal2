@@ -8,10 +8,6 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   hero_sub:
     "Torne-se um Revendedor Oficial Toque Aí e receba comissões mensais por cada condomínio ativo. Tecnologia de ponta que o mercado já está exigindo.",
   slots_text: "Últimas 5 vagas para o treinamento de Janeiro",
-  calc_value: "R$ 5.400,00",
-  calc_condominios: "10 unidades",
-  calc_aptos: "200 aptos",
-  calc_tempo: "3 meses de atuação",
   logo_url:
     "https://lh3.googleusercontent.com/aida-public/AB6AXuA4jismX6sOFFBE5kPM1tvXiEVo50URXvQoXfx9rCPnZ2i7cm7v0JzZTrCnL6eRcQG4ZYTkD0ACDDQmgDstWmqY6-QKLKRamSNwZlbzluMGBBIFD8Gx2k58Zc6t6Af_LrUXXwff1aqgimb_prsXPwbjvSWJaCaNc3Aqe6bYuTKK0kmDrsEoTj47c8lOwsgnrS_7nnn2G0t-yi_ERZZQf-7aMi2tLdoY0Zy8IPB206Nfa82MtyvWnQtA8nNCZV0zZWG0uIF8WXHCk1ku",
   hero_image_url:

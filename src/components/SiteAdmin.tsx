@@ -210,38 +210,6 @@ export default function SiteAdmin({ onError }: { onError: (message: string) => v
       </div>
 
       <div className="section-head">
-        <h2>Simulação de ganhos</h2>
-      </div>
-      <div className="form-card" style={{ marginBottom: 24 }}>
-        <div className="field-grid">
-          <div className="field">
-            <label>Receita recorrente mensal</label>
-            <input value={settings.calc_value} onChange={(e) => update("calc_value", e.target.value)} placeholder="R$ 5.400,00" />
-          </div>
-          <div className="field">
-            <label>Condomínios</label>
-            <input
-              value={settings.calc_condominios}
-              onChange={(e) => update("calc_condominios", e.target.value)}
-              placeholder="10 unidades"
-            />
-          </div>
-          <div className="field">
-            <label>Total de apartamentos</label>
-            <input value={settings.calc_aptos} onChange={(e) => update("calc_aptos", e.target.value)} placeholder="200 aptos" />
-          </div>
-          <div className="field span3">
-            <label>Tempo estimado</label>
-            <input
-              value={settings.calc_tempo}
-              onChange={(e) => update("calc_tempo", e.target.value)}
-              placeholder="3 meses de atuação"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="section-head">
         <h2>Imagens</h2>
       </div>
       <div className="form-card" style={{ marginBottom: 24 }}>

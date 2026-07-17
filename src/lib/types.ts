@@ -115,10 +115,6 @@ export type SiteSettings = {
   hero_headline_highlight: string;
   hero_sub: string;
   slots_text: string;
-  calc_value: string;
-  calc_condominios: string;
-  calc_aptos: string;
-  calc_tempo: string;
   logo_url: string;
   hero_image_url: string;
   gallery_url_1: string;

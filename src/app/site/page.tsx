@@ -241,59 +241,30 @@ export default async function SitePage() {
       </section>
 
       <section className="st-section st-calc-section" id="ganhos">
-        <div className="st-container st-calc-grid">
-          <div>
-            <h2 className="st-h2">Quanto você pode ganhar?</h2>
-            <p className="st-body-lg" style={{ maxWidth: "none" }}>
-              Nossa estrutura de comissionamento foi desenhada para parceiros
-              que buscam escalabilidade e segurança financeira.
+        <div className="st-container" style={{ maxWidth: 720 }}>
+          <h2 className="st-h2">Quanto você pode ganhar?</h2>
+          <p className="st-body-lg" style={{ maxWidth: "none" }}>
+            Nossa estrutura de comissionamento foi desenhada para parceiros que
+            buscam escalabilidade e segurança financeira.
+          </p>
+          <div className="st-tier-list">
+            <div className="st-tier">
+              <div className="st-tier-pct">10%</div>
+              <div>
+                <p className="st-item-title">Até 20 apartamentos</p>
+                <p className="st-item-sub">Comissão mensal fixa por unidade.</p>
+              </div>
+            </div>
+            <div className="st-tier">
+              <div className="st-tier-pct">15%</div>
+              <div>
+                <p className="st-item-title">Mais de 20 apartamentos</p>
+                <p className="st-item-sub">Aumente sua margem com volume.</p>
+              </div>
+            </div>
+            <p className="st-fine-print">
+              * Pagamentos mensais garantidos por contrato de 12 meses ou mais.
             </p>
-            <div className="st-tier-list">
-              <div className="st-tier">
-                <div className="st-tier-pct">10%</div>
-                <div>
-                  <p className="st-item-title">Até 20 apartamentos</p>
-                  <p className="st-item-sub">Comissão mensal fixa por unidade.</p>
-                </div>
-              </div>
-              <div className="st-tier">
-                <div className="st-tier-pct">15%</div>
-                <div>
-                  <p className="st-item-title">Mais de 20 apartamentos</p>
-                  <p className="st-item-sub">Aumente sua margem com volume.</p>
-                </div>
-              </div>
-              <p className="st-fine-print">
-                * Pagamentos mensais garantidos por contrato de 12 meses ou
-                mais.
-              </p>
-            </div>
-          </div>
-          <div className="st-glass-card st-calc-card">
-            <div className="st-calc-head">
-              <p>Simulação de Ganhos</p>
-              <h4 className="st-calc-value">{settings.calc_value}</h4>
-              <p style={{ textTransform: "none", letterSpacing: 0, fontWeight: 400 }}>
-                Receita Recorrente Mensal
-              </p>
-            </div>
-            <div className="st-calc-rows">
-              <div className="st-calc-row">
-                <span>Condomínios</span>
-                <span>{settings.calc_condominios}</span>
-              </div>
-              <div className="st-calc-row">
-                <span>Total Aptos</span>
-                <span>{settings.calc_aptos}</span>
-              </div>
-              <div className="st-calc-row">
-                <span>Tempo Estimado</span>
-                <span>{settings.calc_tempo}</span>
-              </div>
-            </div>
-            <button className="st-btn-outline" type="button">
-              Simular meu cenário
-            </button>
           </div>
         </div>
       </section>

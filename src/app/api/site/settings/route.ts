@@ -28,10 +28,6 @@ export async function PATCH(request: Request) {
   const hero_headline_highlight = String(body.hero_headline_highlight || "").trim().slice(0, 80);
   const hero_sub = String(body.hero_sub || "").trim().slice(0, 400);
   const slots_text = String(body.slots_text || "").trim().slice(0, 120);
-  const calc_value = String(body.calc_value || "").trim().slice(0, 30);
-  const calc_condominios = String(body.calc_condominios || "").trim().slice(0, 30);
-  const calc_aptos = String(body.calc_aptos || "").trim().slice(0, 30);
-  const calc_tempo = String(body.calc_tempo || "").trim().slice(0, 40);
   const logo_url = String(body.logo_url || "").trim().slice(0, 500);
   const hero_image_url = String(body.hero_image_url || "").trim().slice(0, 500);
   const gallery_url_1 = String(body.gallery_url_1 || "").trim().slice(0, 500);
@@ -48,10 +44,6 @@ export async function PATCH(request: Request) {
       hero_headline_highlight,
       hero_sub,
       slots_text,
-      calc_value,
-      calc_condominios,
-      calc_aptos,
-      calc_tempo,
       logo_url,
       hero_image_url,
       gallery_url_1,

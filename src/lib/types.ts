@@ -114,6 +114,7 @@ export type LandingLead = {
   whatsapp: string;
   cidade: string | null;
   created_at: string;
+  converted_partner_id: string | null;
 };
 
 export type Pedido = {

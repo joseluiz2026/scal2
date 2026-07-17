@@ -31,7 +31,7 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [pedidosFechados, setPedidosFechados] = useState<Pedido[]>([]);
   const [pedidosLoading, setPedidosLoading] = useState(true);
-  const [credentials, setCredentials] = useState<{ name: string; username: string; password: string } | null>(null);
+  const [credentials, setCredentials] = useState<{ name: string; username: string; password: string; whatsappNumber?: string | null } | null>(null);
   const [showDemo, setShowDemo] = useState(true);
   const { message, showToast } = useToast();
 
@@ -175,7 +175,12 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
         showToast(data.error || "Não foi possível gerar a senha.");
         return false;
       }
-      setCredentials({ name: partner.pessoa === "PF" ? partner.nome_completo || "" : partner.fantasia || "", username: data.username, password: data.password });
+      setCredentials({
+        name: partner.pessoa === "PF" ? partner.nome_completo || "" : partner.fantasia || "",
+        username: data.username,
+        password: data.password,
+        whatsappNumber: partner.telefone,
+      });
       return true;
     } catch {
       showToast("Não foi possível conectar. Tente novamente.");
@@ -301,7 +306,7 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
           <PartnerForm
             onCreated={(partner, creds) => {
               setPartners((prev) => [partner, ...prev]);
-              setCredentials(creds);
+              setCredentials({ ...creds, whatsappNumber: partner.telefone });
               showToast("Parceiro cadastrado · confira as credenciais geradas");
             }}
             onError={showToast}
@@ -354,7 +359,9 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
         </>
       )}
 
-      {credentials && <CredentialsModal data={credentials} onClose={() => setCredentials(null)} />}
+      {credentials && (
+        <CredentialsModal data={credentials} whatsappNumber={credentials.whatsappNumber} onClose={() => setCredentials(null)} />
+      )}
       <Toast message={message} />
     </div>
   );

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { LandingLead, LandingSettings } from "@/lib/types";
+import type { LandingLead, LandingSettings, Partner } from "@/lib/types";
+import CredentialsModal from "./CredentialsModal";
+import PartnerForm from "./PartnerForm";
 
 const MAX_BG_VIDEO_BYTES = 50 * 1024 * 1024; // matches the storage bucket's fileSizeLimit
 const ALLOWED_BG_VIDEO_TYPES = ["video/mp4", "video/webm"];
@@ -69,6 +71,10 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
   const [saving, setSaving] = useState(false);
   const [uploadingBgVideo, setUploadingBgVideo] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [convertingLead, setConvertingLead] = useState<LandingLead | null>(null);
+  const [credentials, setCredentials] = useState<{ name: string; username: string; password: string; whatsappNumber: string } | null>(
+    null,
+  );
 
   useEffect(() => {
     Promise.all([
@@ -147,6 +153,15 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
       setUploadingBgVideo(false);
       setUploadProgress(0);
     }
+  }
+
+  function handlePartnerCreatedFromLead(partner: Partner, creds: { name: string; username: string; password: string }) {
+    if (!convertingLead) return;
+    setLeads((prev) =>
+      prev.map((lead) => (lead.id === convertingLead.id ? { ...lead, converted_partner_id: partner.id } : lead)),
+    );
+    setCredentials({ ...creds, whatsappNumber: convertingLead.whatsapp });
+    setConvertingLead(null);
   }
 
   if (loading || !settings) {
@@ -503,11 +518,46 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
               </div>
               <div className="row-value">
                 <div className="amount-label mono">{new Date(lead.created_at).toLocaleDateString("pt-BR")}</div>
+                {lead.converted_partner_id ? (
+                  <div className="meta">✅ Virou parceiro</div>
+                ) : (
+                  <button className="btn" onClick={() => setConvertingLead(lead)} style={{ marginTop: 6 }}>
+                    Aprovar e cadastrar como parceiro
+                  </button>
+                )}
               </div>
             </div>
           ))
         )}
       </div>
+
+      {convertingLead && (
+        <div className="pix-modal-overlay">
+          <div className="pix-modal-card" style={{ maxWidth: 640 }}>
+            <div className="pix-modal-head">
+              <div>
+                <div className="pix-modal-title">Cadastrar {convertingLead.nome} como parceiro</div>
+                <div className="pix-modal-sub">
+                  Nome e telefone já vêm preenchidos do cadastro do lead — complete o restante (CPF/CNPJ, comissão, Pix).
+                </div>
+              </div>
+              <button className="btn" onClick={() => setConvertingLead(null)}>
+                Cancelar
+              </button>
+            </div>
+            <PartnerForm
+              initialValues={{ nome: convertingLead.nome, tel: convertingLead.whatsapp }}
+              leadId={convertingLead.id}
+              onCreated={handlePartnerCreatedFromLead}
+              onError={onError}
+            />
+          </div>
+        </div>
+      )}
+
+      {credentials && (
+        <CredentialsModal data={credentials} whatsappNumber={credentials.whatsappNumber} onClose={() => setCredentials(null)} />
+      )}
     </>
   );
 }

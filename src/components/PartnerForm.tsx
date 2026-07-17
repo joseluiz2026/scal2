@@ -6,9 +6,13 @@ import type { Partner } from "@/lib/types";
 type PartnerType = "PF" | "PJ";
 
 export default function PartnerForm({
+  initialValues,
+  leadId,
   onCreated,
   onError,
 }: {
+  initialValues?: { nome?: string; tel?: string };
+  leadId?: string;
   onCreated: (partner: Partner, creds: { name: string; username: string; password: string }) => void;
   onError: (message: string) => void;
 }) {
@@ -18,10 +22,10 @@ export default function PartnerForm({
   const [pix, setPix] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const [pfNome, setPfNome] = useState("");
+  const [pfNome, setPfNome] = useState(initialValues?.nome || "");
   const [pfCpf, setPfCpf] = useState("");
   const [pfRg, setPfRg] = useState("");
-  const [pfTel, setPfTel] = useState("");
+  const [pfTel, setPfTel] = useState(initialValues?.tel || "");
   const [pfEmail, setPfEmail] = useState("");
 
   const [pjRazao, setPjRazao] = useState("");
@@ -59,6 +63,7 @@ export default function PartnerForm({
       segment,
       rate: rateValue,
       pix: pix.trim(),
+      ...(leadId ? { leadId } : {}),
     };
 
     let displayName = "";

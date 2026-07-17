@@ -43,6 +43,7 @@ export async function POST(request: Request) {
   const segment = body.segment === "Técnico" ? "Técnico" : "Loja";
   const rate = Number(body.rate);
   const pix = String(body.pix || "").trim();
+  const leadId = body.leadId ? String(body.leadId) : null;
 
   if (!rate || rate <= 0 || !pix) {
     return NextResponse.json({ error: "Preencha a comissão (%) e a chave Pix." }, { status: 400 });
@@ -120,6 +121,11 @@ export async function POST(request: Request) {
       await admin.auth.admin.deleteUser(authUser.user.id);
       if (insertError.code === "23505") continue;
       return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+
+    if (leadId) {
+      // Best-effort — the partner is already created; a failed link-back shouldn't fail the request.
+      await admin.from("landing_leads").update({ converted_partner_id: partner.id }).eq("id", leadId);
     }
 
     return NextResponse.json({ partner, username: creds.username, password: creds.password });

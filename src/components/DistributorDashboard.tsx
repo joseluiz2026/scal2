@@ -18,9 +18,10 @@ import PartnersList from "./PartnersList";
 import ClosedPedidosList from "./sales/ClosedPedidosList";
 import PendingQuotesList from "./sales/PendingQuotesList";
 import ScheduleList from "./sales/ScheduleList";
+import SiteAdmin from "./SiteAdmin";
 import Toast from "./Toast";
 
-type Tab = "charts" | "quotes" | "partners" | "schedule" | "pedidos" | "landing";
+type Tab = "charts" | "quotes" | "partners" | "schedule" | "pedidos" | "landing" | "site";
 
 export default function DistributorDashboard({ theme }: { theme: string }) {
   const [activeTab, setActiveTab] = useState<Tab>("charts");
@@ -248,6 +249,9 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
         <button className={activeTab === "landing" ? "active" : ""} onClick={() => setActiveTab("landing")}>
           Landing Page
         </button>
+        <button className={activeTab === "site" ? "active" : ""} onClick={() => setActiveTab("site")}>
+          Site
+        </button>
       </div>
 
       {activeTab === "charts" && (
@@ -356,6 +360,15 @@ export default function DistributorDashboard({ theme }: { theme: string }) {
             <h2>Landing Page de captação</h2>
           </div>
           <LandingPageAdmin onError={showToast} />
+        </>
+      )}
+
+      {activeTab === "site" && (
+        <>
+          <div className="section-head">
+            <h2>Site de recrutamento (/site)</h2>
+          </div>
+          <SiteAdmin onError={showToast} />
         </>
       )}
 

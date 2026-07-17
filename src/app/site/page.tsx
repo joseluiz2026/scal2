@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { DEFAULT_SITE_SETTINGS } from "@/lib/siteSettings";
 import "./site.css";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Toque Aí | Seja um Revendedor Oficial",
@@ -7,21 +11,21 @@ export const metadata: Metadata = {
     "Torne-se um Revendedor Oficial Toque Aí e receba comissões mensais recorrentes por cada condomínio ativo.",
 };
 
-const LOGO_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuA4jismX6sOFFBE5kPM1tvXiEVo50URXvQoXfx9rCPnZ2i7cm7v0JzZTrCnL6eRcQG4ZYTkD0ACDDQmgDstWmqY6-QKLKRamSNwZlbzluMGBBIFD8Gx2k58Zc6t6Af_LrUXXwff1aqgimb_prsXPwbjvSWJaCaNc3Aqe6bYuTKK0kmDrsEoTj47c8lOwsgnrS_7nnn2G0t-yi_ERZZQf-7aMi2tLdoY0Zy8IPB206Nfa82MtyvWnQtA8nNCZV0zZWG0uIF8WXHCk1ku";
-const HERO_URL =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAZtRXz9kngfd7sRUPOtJWhAvRAHl9FPeIz_m_EGhUt1AFV-YA5el9Jr7GzKzqNEtLlfD6JxI8arb3lb985yD6GFVooYa37gkzm5q3WRmD4TjV1W6gGUsYmc27fxFxpumXSSv2C2H1x8kkANhIUEBAqsKgApVm-fC6dd4_VCJyaOja1hI-E11xXqNq6hzxd3FXQkqTTqB1_WGZXTvI1E7XpO2mBuzplcD3hYbuonYvy_kAEBEyBhmCv_58yZkhFWj1s4zu2_pAE71MG";
 const MAP_URL =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAFJNE6je6Rskq8WEruJ4JtMEZ1OLVqIYNKP7bSiG67jYUUHVg5kVMTafgnQAoCq-cznlp2hjsIyz8An2jtxfJ6L7V0AnlhsHk2VDU6enq91mwl449v4RwoLigqPdSJiCqFmf3OgKe7ks646XNTRBz1RWsTWv9YtpxzPOcOrujvdroCIpHjIVdLswaHomorXGnLpQUEStT1iF0l7tRanpL5p8Y3FhTixnLx5q5lBIMB4OPXmbESrGd6Cxw6vry0MaAr42Hb9EWwMUwW";
-const GALLERY_URLS = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBMfvs0ao1-sVpI3NOcML1ugQFlE-cvMdAsetNOqc3PB1ySXsgxcG3ibM2NX-IhKcH4li5m52_inQ435oozEQxpXsCFqW2qOHVXQjv0odx73V5CzrW2YKRQnfhdqAGipiNSLYujLjJG72xuL7OIysRLAeGtp5BTqqP8zNj9QV5yNkEVo_i8NxtkSyqUr1yPywC8trbkzz2N0WIGbkUMQJt61urs_maGBQ6IcT4VAO-eJ9oEskhdPrzncAB5eQOoBlFrqakmNJgBju14",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCqXCowd6bOoVYp6Fxkl7MH26On0u1JmlmgTMwACfWqpVdsxoqsprFGG2t84oh_lp5C821V1Y8w6scQEJ29fnwwdDf-pzNyBNyQ_513HvCbPLhOyENHA8P2-K61tuOTWVcH2TkWypQKkwrn8IRshzQ7Dn-_kR3RqvdcdLR9o8Grox-O0YdlisapPI8l_r_BSOazcUCibqaODx_nB-RDnK6oDfBCTYwfnrVu6U1-oupOaF8xW4HGVdEQc9Kzb5DKF-cbEPWdbxYAEMTj",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuB8mRXjh86HDUhMnxObZvMjC6mA9RG4-A8KJRghpTRXdOg76yAa2Cd545wXBzZiZjjrSnWugXSlCgkIP3EuA81lnuGdh2_p2_kxp8XjNGvTZfSVZedaTBhN32WYLstLTb46IN6XUv0ROOF1LvbXt6YnBQBchtkS7pSE5QgJaKzZtbPYtdGf6AZujGYq--25k-i2Gd1ABf0QRgIoJQQ0UvSvYpOrpGanhqLdJt5wDevbuaYbZL6QC7H4WKeQ71ly8-e-LuTZ8JgFkvEz",
-];
 
 const PARCEIROS_HREF = "/parceiros";
 
-export default function SitePage() {
+async function getSettings() {
+  const admin = createAdminClient();
+  const { data } = await admin.from("site_settings").select("*").eq("id", 1).maybeSingle();
+  return data || DEFAULT_SITE_SETTINGS;
+}
+
+export default async function SitePage() {
+  const settings = await getSettings();
+  const galleryUrls = [settings.gallery_url_1, settings.gallery_url_2, settings.gallery_url_3].filter(Boolean);
+
   return (
     <div className="st-page">
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
@@ -33,7 +37,7 @@ export default function SitePage() {
       <nav className="st-nav">
         <div className="st-nav-inner">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="Logo Toque Aí" className="st-logo" src={LOGO_URL} />
+          <img alt="Logo Toque Aí" className="st-logo" src={settings.logo_url} />
           <div className="st-nav-links">
             <a href="#beneficios">Benefícios</a>
             <a href="#como-funciona">Como Funciona</a>
@@ -54,24 +58,20 @@ export default function SitePage() {
       <section className="st-hero" id="hero">
         <div
           className="st-hero-bg"
-          style={{ backgroundImage: `url('${HERO_URL}')` }}
+          style={{ backgroundImage: `url('${settings.hero_image_url}')` }}
         />
         <div className="st-hero-gradient" />
         <div className="st-hero-grid">
           <div className="st-hero-copy">
             <div className="st-badge">
               <span className="st-badge-dot" />
-              <span>OPORTUNIDADE EXCLUSIVA NO ES</span>
+              <span>{settings.hero_eyebrow}</span>
             </div>
             <h1 className="st-h1">
-              Transforme sua carteira em uma{" "}
-              <span className="st-gradient-text">renda recorrente.</span>
+              {settings.hero_headline}{" "}
+              <span className="st-gradient-text">{settings.hero_headline_highlight}</span>
             </h1>
-            <p className="st-body-lg">
-              Torne-se um Revendedor Oficial Toque Aí e receba comissões mensais
-              por cada condomínio ativo. Tecnologia de ponta que o mercado já
-              está exigindo.
-            </p>
+            <p className="st-body-lg">{settings.hero_sub}</p>
             <div>
               <a className="st-btn st-btn-lg" href={PARCEIROS_HREF}>
                 QUERO FAZER PARTE
@@ -272,7 +272,7 @@ export default function SitePage() {
           <div className="st-glass-card st-calc-card">
             <div className="st-calc-head">
               <p>Simulação de Ganhos</p>
-              <h4 className="st-calc-value">R$ 5.400,00</h4>
+              <h4 className="st-calc-value">{settings.calc_value}</h4>
               <p style={{ textTransform: "none", letterSpacing: 0, fontWeight: 400 }}>
                 Receita Recorrente Mensal
               </p>
@@ -280,15 +280,15 @@ export default function SitePage() {
             <div className="st-calc-rows">
               <div className="st-calc-row">
                 <span>Condomínios</span>
-                <span>10 unidades</span>
+                <span>{settings.calc_condominios}</span>
               </div>
               <div className="st-calc-row">
                 <span>Total Aptos</span>
-                <span>200 aptos</span>
+                <span>{settings.calc_aptos}</span>
               </div>
               <div className="st-calc-row">
                 <span>Tempo Estimado</span>
-                <span>3 meses de atuação</span>
+                <span>{settings.calc_tempo}</span>
               </div>
             </div>
             <button className="st-btn-outline" type="button">
@@ -384,7 +384,7 @@ export default function SitePage() {
             O produto em ação
           </h2>
           <div className="st-gallery-grid">
-            {GALLERY_URLS.map((url) => (
+            {galleryUrls.map((url) => (
               <div className="st-glass-card st-gallery-item" key={url}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img alt="Instalação Toque Aí em condomínio" src={url} />
@@ -458,7 +458,7 @@ export default function SitePage() {
             </a>
             <p className="st-slots-note">
               <span className="material-symbols-outlined">lock</span>
-              Últimas 5 vagas para o treinamento de Janeiro
+              {settings.slots_text}
             </p>
           </div>
         </div>
@@ -468,7 +468,7 @@ export default function SitePage() {
         <div className="st-footer-grid">
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="Logo Toque Aí" className="st-footer-logo" src={LOGO_URL} />
+            <img alt="Logo Toque Aí" className="st-footer-logo" src={settings.logo_url} />
             <p>
               Revolucionando o acesso a condomínios com tecnologia 100%
               digital e segura. Viva o futuro agora.

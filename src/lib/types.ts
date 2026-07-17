@@ -108,6 +108,25 @@ export type LandingSettings = {
   updated_at: string;
 };
 
+export type SiteSettings = {
+  id: number;
+  hero_eyebrow: string;
+  hero_headline: string;
+  hero_headline_highlight: string;
+  hero_sub: string;
+  slots_text: string;
+  calc_value: string;
+  calc_condominios: string;
+  calc_aptos: string;
+  calc_tempo: string;
+  logo_url: string;
+  hero_image_url: string;
+  gallery_url_1: string;
+  gallery_url_2: string;
+  gallery_url_3: string;
+  updated_at: string;
+};
+
 export type LandingLead = {
   id: string;
   nome: string;

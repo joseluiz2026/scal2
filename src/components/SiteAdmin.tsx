@@ -37,8 +37,8 @@ export default function SiteAdmin({ onError }: { onError: (message: string) => v
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadingHeroImage, setUploadingHeroImage] = useState(false);
-  const [heroUploadProgress, setHeroUploadProgress] = useState(0);
+  const [uploadingField, setUploadingField] = useState<keyof SiteSettings | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     fetch("/api/site/settings")
@@ -80,7 +80,7 @@ export default function SiteAdmin({ onError }: { onError: (message: string) => v
     }
   }
 
-  async function handleHeroImageUpload(file: File) {
+  async function handleImageUpload(file: File, field: keyof SiteSettings) {
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
       onError("Envie uma imagem .jpg, .png ou .webp.");
       return;
@@ -90,8 +90,8 @@ export default function SiteAdmin({ onError }: { onError: (message: string) => v
       return;
     }
 
-    setUploadingHeroImage(true);
-    setHeroUploadProgress(0);
+    setUploadingField(field);
+    setUploadProgress(0);
     try {
       const prepRes = await fetch("/api/site/image", {
         method: "POST",
@@ -104,14 +104,51 @@ export default function SiteAdmin({ onError }: { onError: (message: string) => v
         return;
       }
 
-      await uploadWithProgress(prepData.signedUrl, file, setHeroUploadProgress);
-      update("hero_image_url", prepData.publicUrl);
+      await uploadWithProgress(prepData.signedUrl, file, setUploadProgress);
+      update(field, prepData.publicUrl);
     } catch (err) {
       onError(err instanceof Error ? err.message : "Não foi possível enviar a imagem.");
     } finally {
-      setUploadingHeroImage(false);
-      setHeroUploadProgress(0);
+      setUploadingField(null);
+      setUploadProgress(0);
     }
+  }
+
+  function renderImageField(field: keyof SiteSettings, label: string, span: "span2" | "span3" | "") {
+    if (!settings) return null;
+    const isUploading = uploadingField === field;
+    return (
+      <div className={`field ${span}`.trim()} key={field}>
+        <label>{label}</label>
+        <input value={String(settings[field] ?? "")} onChange={(e) => update(field, e.target.value)} placeholder="https://..." />
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          disabled={isUploading}
+          style={{ marginTop: 8 }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleImageUpload(file, field);
+            e.target.value = "";
+          }}
+        />
+        {isUploading && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ height: 6, borderRadius: 3, background: "rgba(127, 127, 127, 0.25)", overflow: "hidden" }}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${uploadProgress}%`,
+                  background: "var(--copper)",
+                  transition: "width 0.2s ease",
+                }}
+              />
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>Enviando imagem... {uploadProgress}%</div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   if (loading || !settings) {
@@ -209,58 +246,11 @@ export default function SiteAdmin({ onError }: { onError: (message: string) => v
       </div>
       <div className="form-card" style={{ marginBottom: 24 }}>
         <div className="field-grid">
-          <div className="field span3">
-            <label>Logo (usada no topo e no rodapé)</label>
-            <input value={settings.logo_url} onChange={(e) => update("logo_url", e.target.value)} placeholder="https://..." />
-          </div>
-          <div className="field span3">
-            <label>Imagem de fundo do topo (hero)</label>
-            <input
-              value={settings.hero_image_url}
-              onChange={(e) => update("hero_image_url", e.target.value)}
-              placeholder="https://..."
-            />
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              disabled={uploadingHeroImage}
-              style={{ marginTop: 8 }}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleHeroImageUpload(file);
-                e.target.value = "";
-              }}
-            />
-            {uploadingHeroImage && (
-              <div style={{ marginTop: 8 }}>
-                <div style={{ height: 6, borderRadius: 3, background: "rgba(127, 127, 127, 0.25)", overflow: "hidden" }}>
-                  <div
-                    style={{
-                      height: "100%",
-                      width: `${heroUploadProgress}%`,
-                      background: "var(--copper)",
-                      transition: "width 0.2s ease",
-                    }}
-                  />
-                </div>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
-                  Enviando imagem... {heroUploadProgress}%
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="field">
-            <label>Galeria — foto 1</label>
-            <input value={settings.gallery_url_1} onChange={(e) => update("gallery_url_1", e.target.value)} placeholder="https://..." />
-          </div>
-          <div className="field">
-            <label>Galeria — foto 2</label>
-            <input value={settings.gallery_url_2} onChange={(e) => update("gallery_url_2", e.target.value)} placeholder="https://..." />
-          </div>
-          <div className="field">
-            <label>Galeria — foto 3</label>
-            <input value={settings.gallery_url_3} onChange={(e) => update("gallery_url_3", e.target.value)} placeholder="https://..." />
-          </div>
+          {renderImageField("logo_url", "Logo (usada no topo e no rodapé)", "span3")}
+          {renderImageField("hero_image_url", "Imagem de fundo do topo (hero)", "span3")}
+          {renderImageField("gallery_url_1", "Galeria — foto 1", "")}
+          {renderImageField("gallery_url_2", "Galeria — foto 2", "")}
+          {renderImageField("gallery_url_3", "Galeria — foto 3", "")}
         </div>
         <div className="submit-row">
           <a className="btn" href="/site" target="_blank" rel="noopener noreferrer">

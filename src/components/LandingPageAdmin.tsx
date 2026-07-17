@@ -71,6 +71,8 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
   const [saving, setSaving] = useState(false);
   const [uploadingBgVideo, setUploadingBgVideo] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingBgImage, setUploadingBgImage] = useState(false);
+  const [bgImageUploadProgress, setBgImageUploadProgress] = useState(0);
   const [convertingLead, setConvertingLead] = useState<LandingLead | null>(null);
   const [credentials, setCredentials] = useState<{ name: string; username: string; password: string; whatsappNumber: string } | null>(
     null,
@@ -164,6 +166,40 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
     setConvertingLead(null);
   }
 
+  async function handleBgImageUpload(file: File) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      onError("Envie uma imagem .jpg, .png ou .webp.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      onError("A imagem excede o limite de 8MB.");
+      return;
+    }
+
+    setUploadingBgImage(true);
+    setBgImageUploadProgress(0);
+    try {
+      const prepRes = await fetch("/api/site/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentType: file.type }),
+      });
+      const prepData = await prepRes.json();
+      if (!prepRes.ok) {
+        onError(prepData.error || "Não foi possível preparar o envio da imagem.");
+        return;
+      }
+
+      await uploadWithProgress(prepData.signedUrl, file, setBgImageUploadProgress);
+      update("bg_media_url", prepData.publicUrl);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Não foi possível enviar a imagem.");
+    } finally {
+      setUploadingBgImage(false);
+      setBgImageUploadProgress(0);
+    }
+  }
+
   if (loading || !settings) {
     return (
       <div className="card">
@@ -253,6 +289,45 @@ export default function LandingPageAdmin({ onError }: { onError: (message: strin
                       </div>
                       <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
                         Enviando vídeo... {uploadProgress}%
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {settings.bg_media_type === "image" && (
+                <div className="field span3">
+                  <label>Ou envie um arquivo de imagem (.jpg, .png ou .webp, até 8MB)</label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    disabled={uploadingBgImage}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleBgImageUpload(file);
+                      e.target.value = "";
+                    }}
+                  />
+                  {uploadingBgImage && (
+                    <div style={{ marginTop: 8 }}>
+                      <div
+                        style={{
+                          height: 6,
+                          borderRadius: 3,
+                          background: "rgba(127, 127, 127, 0.25)",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${bgImageUploadProgress}%`,
+                            background: "var(--copper)",
+                            transition: "width 0.2s ease",
+                          }}
+                        />
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                        Enviando imagem... {bgImageUploadProgress}%
                       </div>
                     </div>
                   )}
